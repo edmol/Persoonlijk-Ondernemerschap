@@ -1,0 +1,216 @@
+$opts['fdd']['dummy1'] = array (
+   'name' => 'Stats',
+   'sql|lf' => 'if(host_name = "aqhost.com", 
+      CONCAT("<a href=\"http://", 
+         domain_name, ":2082/3rdparty/phpMyAdmin/index.php\" target=\"_blank\">pma</a><br><a href=\"http://", domain_name, 
+            ":2082/frontend/AQHost/backup/index.html\" target=\"_blank\">backup</a><br><a href=\"http://",
+               domain_name, 
+                  ":2082/frontend/AQHost/stats/index.html\" target=\"_blank\">stats</a><br><a href=\"http://",  
+                     domain_name, 
+                        ":2082/frontend/AQHost/cron/index.html\" target=\"_blank\">cron</a>"), 
+                           "")',
+   'options'  => 'L',
+   'escape' => false,
+   'sort'     => false
+);
+
+
+
+$opts['fdd']['dummy']['sql'] = 'User1 + User2'; 
+
+
+$now = time();
+
+$opts['fdd']['dummy_field'] = array(
+  'css'        => array('postfix' => 'right-justify'),
+  'name'       => 'Days since last edit',
+  'mask'       =>  '%0.1f',
+  'options'    => 'L',
+  'sql'        => "($now - UNIX_TIMESTAMP(updated))/86400",
+); 
+
+
+$opts['fdd']['dummy1'] = array (
+   'name'    => 'Dummy',
+   'sql'     => 'CONCAT(first_name, " ", last_name)',
+   'options' => 'RACPDVL',
+   'escape'  => false,
+   'sort'    => true
+);
+
+
+$opts['fdd']['CurrentDate'] = array(
+  'name'     => 'Current Date',
+  'select'   => 'T',
+  'maxlen'   => 14,
+  'options'  => 'L',
+  'sql'    => 'CURDATE()',
+  'sort'     => true
+);
+
+
+
+3. Virtual field
+
+PME principle is : Each hash-entry of the $opts['fdd'] table in the calling script is a field from the main table. But, in some case, you may want to display something LIKE a field which isn't a field in the main table (computed field, joined field, ...) That's why we add the 'V' flag to 'input' option.
+
+4. custom join: Even for basic "table lookup", you may require to do some custom join. this is the purpose of this. Custom join is required when you use inside a virtual field because PME can't guess how to join. (the joining "field" doesn't exist)
+
+5. sql feature. (See the documentation) It's especially useful for virtual fields (else PME won't know what to display)
+
+6. your sample :
+
+See the sql script uploaded to see the model I used.
+
+<?
+
+$debug_query = true; //useful trick to know
+
+$opts['hn'] = 'localhost';
+$opts['un'] = 'root';
+$opts['pw'] = '';
+$opts['db'] = 'trip';
+$opts['tb'] = 'trips'; // main table
+
+$opts['key'] = 'tdyrefnum'; // Name of field which is the unique key
+$opts['options'] = 'ACPVDF';
+$opts['navigation'] = 'DUGB';
+
+$opts['fdd']['tdyrefnum'] = array( //'primary key' of 'trips'
+'name' => 'Tdyrefnum',
+'required' => true,
+'sort' => true
+);
+$opts['fdd']['label'] = array( //sample field of 'trips'
+'name' => 'Label',
+'maxlen' => 45,
+'required' => true,
+'sort' => true
+);
+
+//travellers' table part
+
+//do the join
+$opts['fdd']['join_to_travellers'] = array( //join_to_travellers or foo or dummy or...
+	'input' => 'VR', // ........ because field is V(irtual), it don't exist in the main table
+	'options' => '', //just do the join, don't display anything
+	'values' => Array( //API for currently making a join in PME.
+	'table' => 'travellers', //the joined table
+	'column' => 'idtraveller', //the joined key
+	'description' => 'idtraveller', //the joined value - here, it's only required to force the join
+	'join' => '$main_table.idtraveller = $join_table.idtraveller') //custom join because PME can't guess the joining field because it's virtual.
+);
+
+//sample of display of a field in the joined table
+
+$opts['fdd']['a_field_from_traveller'] = array(
+	'name' => 'FirstName',
+	'input' => 'VR',
+	'options' => 'LFV',
+	'sql' => 'PMEjoin2.label'
+	//joined table are aliased and numbered starting from 0 and using the field rank
+	// join to travellers is the field number 2 so the join performed is PMEjoin2
+);
+
+$opts['fdd']['join_to_requesters'] = array(
+	'input' => 'VR',
+	'options' => '',
+	'values' => Array(
+	'table' => 'tripsrequesters',
+	'column' => 'tdyrefnum',
+	'description' => 'tdyrefnum',
+	'join' => '$main_table.tdyrefnum = $join_table.tdyrefnum')
+);
+
+$opts['fdd']['a_field_from_tripsrequesters'] = array(
+	'name' => 'label from tripsrequester',
+	'input' => 'VR',
+	'options' => 'LFV',
+	'sql' => 'PMEjoin4.label'
+);
+
+$opts['fdd']['join_to_tripstravellers'] = array(
+	'input' => 'VR',
+	'options' => '',
+	'values' => Array(
+	'table' => 'tripstravellers',
+	'column' => 'tdyrefnum',
+	'description' => 'tdyrefnum',
+	'join' => '$main_table.tdyrefnum = $join_table.tdyrefnum')
+);
+
+$opts['fdd']['a_field_from_tripstravellers'] = array(
+	'name' => 'label from tripstraveller',
+	'input' => 'VR',
+	'options' => 'LFV',
+	'sql' => 'PMEjoin6.label'
+);
+
+// Now important call to phpMyEdit
+require_once 'phpMyEdit.class.php';
+new phpMyEdit($opts);
+
+
+
+2004-05-13
+In the CVS version of PME you can set a field as being a virtual field so it doesn't need to be in the database. Have a look at the documentation in the CVS for the full options.
+
+Dummy fields can be configured to make calculations, for example
+to add 30 to 'col_name':
+
+$opts['fdd']['dummy'] = array(
+  'name'     => 'Dummy',
+  'options'  => 'L',
+  'select'   => 'T',
+  'sql|L'    => 'some_other_column + 30',
+  'sort'     => true
+);
+
+------
+
+
+$opts['fdd']['dummy'] = array(
+  'name'     => 'Total',
+  'select'   => 'T',
+  'maxlen'   => 11,
+  'sql'      => 'field1 + field2',
+  'sort'     => true
+); 
+
+-----
+Dummy fields can be created to display calculations.
+
+$opts['fdd']['due_date'] = array(
+  'input'      => '',
+  'maxlen'     => 10,
+  'name'       => 'Due Date',
+  'options'    => 'L',
+  'select'     => 'T',
+  'sort'       => true
+); 
+
+$opts['fdd']['dummy_column'] = array(
+  'maxlen'   => 14,
+  'name'     => 'Days Until',
+  'options'  => 'L',
+  'select'   => 'T',
+  'sort'     => true,
+  'sql'    => 'due_date - CURDATE()'
+); 
+
+-----
+
+$now = time();
+
+// updated field is TIMESTAMP column type
+$opts['fdd']['dummy_field'] = array(
+  'css'        => array('postfix' => 'right-justify'),
+  'name'       => 'Days since last edit',
+  'mask'       =>  '%0.1f',
+  'options'    => 'L',
+  'sql'        => "( $now - UNIX_TIMESTAMP(updated) ) / 86400",
+); 
+
+
+-----
+

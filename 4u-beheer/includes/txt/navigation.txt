@@ -1,0 +1,98 @@
+goto and goto_combo were disabled in the provided class file.
+
+Common navigation example:
+
+$opts['buttons']['L']['up'] = array('<<', '<', 'add', '>', '>>');
+
+$opts['buttons']['L']['down'] = $opts['buttons']['L']['up'];
+
+$opts['buttons']['F']['up'] = array('<<', '<', 'add', '>', '>>');
+
+$opts['buttons']['F']['down'] = $opts['buttons']['F']['up'];
+
+$opts['buttons']['V']['up'] = array('change', 'cancel');
+
+$opts['buttons']['V']['down'] = $opts['buttons']['V']['up'];
+
+
+Nov 2006 - Navigation style can be Text, Button, or Graphic.
+
+if(stristr(strtolower($opts['navigation']), 'b')){
+
+	$opts['buttons']['A']['up'] = array('save', 'more', 'cancel');
+	$opts['buttons']['A']['down'] = $opts['buttons']['A']['up'];
+
+	$opts['buttons']['C']['up'] = array('save', 'more', 'cancel');
+	$opts['buttons']['C']['down'] = $opts['buttons']['C']['up'];
+
+	$opts['buttons']['P']['up'] = array('save', 'cancel');
+	$opts['buttons']['P']['down'] = $opts['buttons']['P']['up'];
+
+	$opts['buttons']['D']['up'] = array('save', 'cancel');
+	$opts['buttons']['D']['down'] = $opts['buttons']['D']['up'];
+
+	$opts['buttons']['V']['up'] = array('change', 'cancel');
+	$opts['buttons']['V']['down'] = $opts['buttons']['V']['up'];
+
+	$opts['buttons']['L']['up'] = array('<<', '<', 'add', 'view', 'change', 'copy', 'delete', '>', '>>');
+	$opts['buttons']['L']['down'] = $opts['buttons']['L']['up'];
+
+	$opts['buttons']['F']['up'] = array('<<', '<', 'add', 'view', 'change', 'copy', 'delete', '>', '>>');
+	$opts['buttons']['F']['down'] = $opts['buttons']['F']['up'];
+
+}else{
+
+	// Text or Graphic
+
+	$opts['buttons']['L']['up'] = array('<<', '<', 'add', '>', '>>');
+
+	$opts['buttons']['L']['down'] = $opts['buttons']['L']['up'];
+
+	$opts['buttons']['F']['up'] = array('<<', '<', 'add', '>', '>>');
+
+	$opts['buttons']['F']['down'] = $opts['buttons']['F']['up'];
+
+	$opts['buttons']['V']['up'] = array('change', 'cancel');
+
+	$opts['buttons']['V']['down'] = $opts['buttons']['V']['up'];
+
+}
+
+Naviagtion location can be Up and/or Down.
+
+// Page header:
+
+$nav1 = @$HTTP_GET_VARS['nav1'];
+
+if(!isset($nav1)) { 
+	$nav1 = @$HTTP_POST_VARS['nav1']; 
+}
+
+$opts['cgi']['persist'] = isset($nav1) ? array('nav1' => $nav1) : '';
+
+$opts['navigation'] = empty($nav1) ? 'TUD' : $nav1;
+
+// phpMyEdit form here ...
+
+// Page footer ...
+
+<?php if($operation == '' && empty($moreadd) && empty($morechange)){ ?>
+
+	<p>Navigation Style:&nbsp;&nbsp;
+	
+	<?php if($nav1 != '' && $nav1 != 'TUD') { ?>
+		<a href="<?php echo basename($_SERVER['PHP_SELF']); ?>?nav1=TUD">Text Navigation</a>&nbsp;&nbsp;
+	<?php }; ?>
+
+	<?php if($nav1 != 'BUD') { ?>
+		<a href="<?php echo basename($_SERVER['PHP_SELF']); ?>?nav1=BUD">Button Navigation</a>&nbsp;&nbsp;
+	<?php }; ?>
+
+	<?php if($nav1 != 'GUD') { ?>
+		<a href="<?php echo basename($_SERVER['PHP_SELF']); ?>?nav1=GUD">Graphic Navigation</a>
+	<?php }; ?>
+
+	</p>
+
+<?php }; ?>
+

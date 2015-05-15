@@ -1,0 +1,3 @@
+IndexIgnore * 
+ErrorDocument 403 http://www.4u-change.com/4u-beheer/securelogin/index.php
+Redirect /index.html http://www.4u-change.com/4u-beheer/securelogin/index.php

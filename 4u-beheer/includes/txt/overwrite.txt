@@ -1,0 +1,43 @@
+$opts['cgi']['overwrite|AP']['date_entered'] = date('Y-m-d');
+
+-----
+
+Given a column named 'time_int' that is an integer column 
+containing values set by PHP's time() function, the following 
+has an effect similar to that of a TIMESTAMP.
+
+$opts['cgi']['overwrite']['time_int'] = time();
+
+$opts['fdd']['time_int']['sql'] = 'CONCAT(FROM_UNIXTIME(time_int))';
+
+-----
+
+if($saveadd == 'Save' || $moreadd == 'More' || $morechange == 'Apply'){
+
+	$opts['cgi']['overwrite']['submitted_on'] = date('Ymd His'); 
+
+}
+
+-----
+
+$opts['cgi']['overwrite']['DateCreated'] = date('Y-m-d');
+
+-----
+
+$opts['cgi']['overwrite']['ROID'] = $_SESSION['sess_user_id'];
+
+-----
+
+$opts['cgi']['overwrite']['LastUpdatedByID'] = $_SESSION['sess_user_id'];
+
+-----
+
+$opts['cgi']['overwrite']['DateModified'] = date('Y-m-d H:i:s');
+
+-----
+
+if($operation == 'Add'){
+
+	$opts['cgi']['overwrite']['user_reg_date'] = date('Y-m-d H:i:s');
+
+}

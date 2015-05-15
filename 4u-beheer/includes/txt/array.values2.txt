@@ -1,0 +1,134 @@
+To create a drop down that displays text but records a number,
+consider the following field array:
+
+$opts['fdd']['hidden'] = array(
+  'default'    => '0',
+  'help|ACP'   => 'Select',
+  'input'      => '',
+  'maxlen'     => 1,
+  'name'       => 'Hidden',
+  'options'    => 'ACPVDFL',
+  'required'   => false,
+  'select'     => 'D',
+  'sort'       => true,
+  'values2'    => array('0' => 'No', '1' => 'Yes')
+);
+
+The following example illustrates post-initialization of the
+'values2' array. Readability may sometimes be enhanced by
+post-initializing a 'values2' array.
+
+$opts['fdd']['hidden'] = array(
+  'default'    => '0',
+  'help|ACP'   => 'Select',
+  'input'      => '',
+  'maxlen'     => 1,
+  'name'       => 'Hidden',
+  'options'    => 'ACPVDFL',
+  'required'   => false,
+  'select'     => 'D',
+  'sort'       => true
+);
+
+// Post-initialization example 1:
+$opts['fdd']['hidden']['values2'] = array('0' => 'No',  '1' => 'Yes');
+
+// Post-initialization example 2:
+// $opts['fdd']['col_name']['values2'] = array('1' => 'Yes', '0' => 'No');
+
+
+Random examples of post-initialized drop downs follow.
+
+$opts['fdd']['col_name']['values2'] = array(
+  'N' => 'No',
+  'Y' => 'Yes',
+);
+
+$opts['fdd']['col_name']['values2'] = array(
+   '0' => 'Public',
+   '1' => 'Private'
+);
+
+$opts['fdd']['col_name']['values2'] = array(
+  '0' => 'Uncategorized',
+  '1' => 'First Class',
+  '2' => 'Second Class',
+  '3' => 'Third Class'
+);
+
+$opts['fdd']['col_name']['values2'] = array(
+   '' => '',
+   'AL' => 'Alabama', 
+   'AK' => 'Alaska', 
+   'AZ' => 'Arizona', 
+   'AR' => 'Arkansas', 
+   'CA' => 'California', 
+   'CO' => 'Colorado', 
+   'CT' => 'Connecticut', 
+   'DC' => 'Dist. of Columbia', 
+   'DE' => 'Delaware', 
+   'FL' => 'Florida', 
+   'GA' => 'Georgia', 
+   'HI' => 'Hawaii', 
+   'ID' => 'Idaho', 
+   'IL' => 'Illinois', 
+   'IN' => 'Indiana', 
+   'IA' => 'Iowa', 
+   'KS' => 'Kansas', 
+   'KY' => 'Kentucky', 
+   'LA' => 'Louisiana', 
+   'ME' => 'Maine', 
+   'MD' => 'Maryland', 
+   'MA' => 'Massachusetts', 
+   'MI' => 'Michigan', 
+   'MN' => 'Minnesota', 
+   'MS' => 'Mississippi', 
+   'MO' => 'Missouri', 
+   'MT' => 'Montana', 
+   'NE' => 'Nebraska', 
+   'NV' => 'Nevada', 
+   'NH' => 'New Hampshire', 
+   'NJ' => 'New Jersey', 
+   'NM' => 'New Mexico', 
+   'NY' => 'New York', 
+   'NC' => 'North Carolina', 
+   'ND' => 'North Dakota', 
+   'OH' => 'Ohio', 
+   'OK' => 'Oklahoma', 
+   'OR' => 'Oregon', 
+   'PA' => 'Pennsylvania', 
+   'RI' => 'Rhode Island', 
+   'SC' => 'South Carolina', 
+   'SD' => 'South Dakota', 
+   'TN' => 'Tennessee', 
+   'TX' => 'Texas', 
+   'UT' => 'Utah', 
+   'VT' => 'Vermont', 
+   'VA' => 'Virginia', 
+   'WA' => 'Washington', 
+   'WV' => 'West Virginia', 
+   'WI' => 'Wisconsin', 
+   'WY' => 'Wyoming'
+);
+
+$opts['fdd']['col_name']['values2']   = array(
+   '0' => 'Sunday',
+   '1' => 'Monday',
+   '2' => 'Tuesday', 
+   '3' => 'Wednesday',
+   '4' => 'Thursday',
+   '5' => 'Friday',
+   '6' => 'Saturday'
+);
+
+If the same array for 'values2' will be used multiple times
+in your form, consider creating it in a way that will
+enhance readability when it's applied.
+
+$yn = array(
+   '0' => 'No',
+   '1' => 'Yes'
+);
+
+$opts['fdd']['col_name']['values2'] = $yn;
+

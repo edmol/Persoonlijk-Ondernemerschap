@@ -1,0 +1,75 @@
+
+R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
+Copyright (C) 2013 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> #                     RUN SURVEY 17746 R SCRIPT Killman - Conflicthantering 
+> # 
+> # Require van packages ! Deze moeten vooraf geinstalleerd zijn
+> #
+> require(grDevices)
+> require(season)
+Loading required package: season
+Warning message:
+In library(package, lib.loc = lib.loc, character.only = TRUE, logical.return = TRUE,  :
+  there is no package called ‘season’
+> #
+> # Database variabelen
+> #
+> require(RMySQL)
+Loading required package: RMySQL
+Loading required package: DBI
+> driver <- MySQL(max.con=100, force.reload = TRUE)
+> db_parmfile <- "/var/www/Rscripts/RMySQL.cnf"
+> #
+> survey <- '17746'
+> #
+> #
+> ###################################################################################
+> # ZET PRODUCTIE OF TEST VARIABELE HIER !!!!!!!!!!!!!!!!!!!!!!!!!!
+> ###################################################################################
+> ontwikkel <- "N" 
+> #################################################################################
+> if (ontwikkel == "Y")  {
++   toetsgrp <- 'tsttoets'
++   histgrp  <- 'tsthist'
++   dirgraph <- '/var/www/wp-content/gallery/'
++   meangraph <- '/var/www/wp-content/gallery/mean/'
++ } else
++ { 
++   toetsgrp <- 'toetsen'
++   histgrp  <- 'prdhist'
++   dirgraph <- '/var/www/4u-change.com/web/wp-content/gallery/'
++   meangraph <- '/var/www/4u-change.com/web/wp-content/gallery/mean/'
++ }
+> # ------------------------------------------------------------------------------------------------
+> # Tokentabel is de tabel in limesurvey met de naam lime_tokens_xxxxx en bevat de tokens
+> # resulttabel is de tabel in limesurvey met de naam lime_survey_xxxxx en bevat de resultaten
+> # ------------------------------------------------------------------------------------------------
+> tokentable <- paste('lime_tokens_',survey,sep="")
+> resulttable <- paste('lime_survey_',survey,sep="")
+> # ------------------------------------------------------------------------------------------------
+> # Opmaken database connectie met survey en historiedatabase
+> # ------------------------------------------------------------------------------------------------
+> surveydb=dbConnect(MySQL(),user="root",password="mvhcmdhjh82",host="localhost",dbname="potoets")
+Error in mysqlNewConnection(drv, ...) : 
+  RS-DBI driver: (Failed to connect to database: Error: Access denied for user 'root'@'localhost' (using password: YES)
+)
+Calls: dbConnect ... .valueClassTest -> is -> is -> mysqlNewConnection -> .Call
+Execution halted

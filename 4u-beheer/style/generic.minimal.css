@@ -1,0 +1,25 @@
+body{
+font-family:verdana,helvetica,arial,sans-serif;
+font-size:small;
+font-weight:normal;
+line-height:140%;
+margin:20px;
+}
+input,
+select,
+textarea{
+font-family:verdana,helvetica,arial,sans-serif;
+font-size:small;
+font-weight:normal;
+margin:1px;
+}
+table.pme-tab{
+margin:10px 0px;
+}
+td{
+padding:3px;
+}
+th{
+font-family:verdana,helvetica,arial,sans-serif;
+padding:3px;
+}

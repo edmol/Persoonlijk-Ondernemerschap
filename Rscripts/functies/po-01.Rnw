@@ -1,0 +1,1258 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{lscape}
+\usepackage{geometry}
+\geometry{verbose,tmargin=0.7cm,bmargin=1.2cm,lmargin=0.5cm,rmargin=0.5cm}
+\usepackage[dutch]{babel}
+\usepackage{graphicx}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage[table]{xcolor}
+\usepackage{caption}
+\usepackage{subcaption}
+\begin{document}
+\title{\textbf{Persoonlijk Fundament en Ondernemerschap  \\ Deelrapportage II \\ Persoonlijk Ondernemerschap}}
+\author{}
+\maketitle
+\SweaveOpts{concordance=FALSE}
+\SweaveOpts{echo=FALSE}
+<<echo=FALSE, results=hide >>=
+###################################################################################
+# ZET PRODUCTIE OF TEST VARIABELE HIER !!!!!!!!!!!!!!!!!!!!!!!!!!
+###################################################################################
+ontwikkel <- "N" 
+#################################################################################
+if (ontwikkel == "Y")  {
+  db_parmfile <- "/Library/Webserver/Documents/Rscripts/RMySQL.cnf"
+  toetsgrp <- 'prdtoets'
+  histgrp  <- 'prdhist'
+  dirgraph <- '/Library/Webserver/Documents/wp-content/gallery/porapporten/'
+  default_images <- '/Library/Webserver/Documents/Rscripts/images/'
+  functie_map <- "/Library/Webserver/Documents/Rscripts/functies/"
+  data_map     <- "/Library/Webserver/Documents/Rscripts/data/"
+  data_file    <- "toets-po-cockpit.csv"
+} else
+{ 
+  db_parmfile <- "/var/www/Rscripts/RMySQL.cnf"
+  toetsgrp <- 'prdtoets'
+  histgrp  <- 'prdhist'
+  dirgraph <- '/var/www/4u-change.com/web/wp-content/gallery/porapporten/'
+  default_images <- '/var/www/Rscripts/images/'
+  functie_map <- "/var/www/Rscripts/functies/"
+  data_map     <- "/var/www/Rscripts/data/"
+  data_file    <- "toets-po-cockpit.csv"
+}
+source(paste(functie_map,"leesinputfile.R",sep=""))
+source(paste(functie_map,"po1-print-heading.R",sep=""))
+source(paste(functie_map,"po1-print-antwoorden.R",sep=""))
+source(paste(functie_map,"po1-print-summ.R",sep=""))
+source(paste(functie_map,"haalomschrijving.R",sep=""))
+omschrijving <- haalomschrijving(dirtoken)
+#########################################################
+# Voor wie gaan we het rapport maken ? 
+# Dit hebben we nodig om te kunnen bepalen welke
+# matrices we moeten importeren vanuit de folder 
+# die we bij de aanmaak van de tokens gemaakt hebben en
+# met de pre-processing gevuld hebben
+# welke subdirectory va $dirgraph ?
+#########################################################
+#
+# Inlezen van de vragen en de gewogen waarden van de antwoorden
+#
+source(paste(functie_map,"facilitator_teksten.R",sep=""))
+folder <- paste(dirgraph,dirtoken,'/',sep="")
+poimages <- folder
+tokens <- list.files(path=folder,pattern="\\.data$")
+for(i in 1:2)
+{
+if(substr(tokens[i],nchar(tokens[i])-19,nchar(tokens[i])-19)=='1'){rtoken<-tokens[i]}
+  else
+    if(substr(tokens[i],nchar(tokens[i])-19,nchar(tokens[i])-19)=='2'){f1token<-tokens[i]}
+}
+rvnaam <- substr(rtoken,1,nchar(rtoken)-20)
+f1vnaam <- substr(f1token,1,nchar(f1token)-20)
+#
+naamf <- list.files(path=folder,pattern="\\.naam$")
+for(i in 1:2)
+{
+if(substr(naamf[i],nchar(naamf[i])-19,nchar(naamf[i])-19)=='1')
+  {
+  rdata <- as.matrix(read.table(naamf[i]))
+  rvnaam <- rdata[1,1]
+  rdata[1,4] <- paste(substr(rdata[1,4],9,10),'/',substr(rdata[1,4],6,7),'/',substr(rdata[1,4],1,4),sep="")
+  }
+  else
+    if(substr(naamf[i],nchar(naamf[i])-19,nchar(naamf[i])-19)=='2')
+      {
+      f1data <- as.matrix(read.table(naamf[i]))
+      f1vnaam <- f1data[1,1]
+      f1data[1,4] <- paste(substr(f1data[1,4],9,10),'/',substr(f1data[1,4],6,7),'/',substr(f1data[1,4],1,4),sep="")
+      }
+}
+#
+# inlezen van de berekende resultaten uit de pre-processing stap
+#
+rresults <- as.matrix(read.table(paste(folder,rtoken,sep="")))
+f1results <- as.matrix(read.table(paste(folder,f1token,sep="")))
+#
+# Nu in een keer de matrix aanmaken voor alle images met per veld de complete naam
+#
+source(paste(functie_map,"po_vul_img_matrx.R",sep=""))
+#
+# code voor stellingen_resultaten en grafieken worden aangeroepen in het eerste rapport v1
+# de volgorde van de rapporten staan in de routine pre-processing.R
+#
+source(paste(functie_map,"po1_dataframes.R",sep=""))
+#
+# Initialiseer matrices voor koester en ontwikkel punten en verschillen analyse
+#
+ko_img <- matrix(1:51,ncol=1)
+kb_img <- matrix(1:51,ncol=1)
+oo_img <- matrix(1:51,ncol=1)
+ob_img <- matrix(1:51,ncol=1)
+f1_img <- matrix(1:51,ncol=1)
+#
+# Maximaal aantal is gelijk aan 50 en de 51e bevat de heading
+#
+blanco_img <- paste(default_images,"blanco.png",sep="")
+for (i in 1 : 51 )
+{
+ ko_img[i] <- blanco_img
+ kb_img[i] <- blanco_img
+ oo_img[i] <- blanco_img
+ ob_img[i] <- blanco_img
+ f1_img[i] <- blanco_img
+}
+#
+# Nu de images voor de 6 pagina's klaarzetten ( maximaal 50 per pagina ).
+#
+# eerts tellers initialiseren voor plaats bepaling
+#
+tko <- 1
+tkb <- 1
+too <- 1
+tob <- 1
+tf1 <- 1
+#
+# Nu koesterpunten en ontwikkelpunten en verschillen images bepalen over de 100 stellingen heen
+#
+for (i in 1 : 100)
+{
+ tot <- sum(f1results[i])
+ if (rresults[i] >=80 & vraag_soort[i]=="o")
+ {
+   ko_img[tko] <- img[i]
+   tko <- tko + 1
+ }
+ if (rresults[i] >=80 & vraag_soort[i]=="b")
+ {
+   kb_img[tkb] <- img[i]
+   tkb <- tkb + 1
+ }
+ if (rresults[i] <= 40 & vraag_soort[i]=="o")  
+ {
+   oo_img[too] <- img[i]
+   too <- too + 1
+ }
+ if (rresults[i] <= 60 & vraag_soort[i]=="b")
+ {
+   ob_img[tob] <- img[i]
+   tob <- tob + 1
+ }
+ div1 <- abs(rresults[i]-f1results[i])
+ if (div1 >= 40) 
+ {
+  f1_img[tf1] <- img[i]
+  tf1 <- tf1 + 1
+ }
+}
+#
+# Heading aanmaken voor de paginas koesterpunten en ontwikkelpunten en verschillen
+#
+print1heading("Koesterpunten",paste("Mate van ondernemendheid van ",rvnaam,' ',rdata[1,2]),rvnaam,f1vnaam,"ko.png")
+print1heading("Koesterpunten",paste("Mate van behoudendheid van ",rvnaam,' ',rdata[1,2]),rvnaam,f1vnaam,"kb.png")
+print1heading("Ontwikkelpunten",paste("Mate van ondernemendheid van ",rvnaam,' ',rdata[1,2]),rvnaam,f1vnaam,"oo.png")
+print1heading("Ontwikkelpunten",paste("Mate van behoudendheid van ",rvnaam,' ',rdata[1,2]),rvnaam,f1vnaam,"ob.png")
+print1heading("Verschillen",paste("verschil in inzicht ten opzichte van",f1vnaam," ",f1data[1,2]),rvnaam,f1vnaam,"vf1.png")
+ko_img[51] <- paste(folder,'ko.png',sep="")
+kb_img[51] <- paste(folder,'kb.png',sep="")
+oo_img[51] <- paste(folder,'oo.png',sep="")
+ob_img[51] <- paste(folder,'ob.png',sep="")
+f1_img[51] <- paste(folder,'vf1.png',sep="")
+@
+\begin{center}
+\includegraphics[width=190mm,height=30mm]{\Sexpr{img[186]}}
+\end{center}
+\color{green}
+\centerline{\textbf {\large \Sexpr{rvnaam} \Sexpr{rdata[1,2]}}}
+\color{black}
+\centerline{\textbf {\Sexpr{organisatie}}}
+\centerline{Team : \Sexpr{omschrijving}}
+\centerline{Stellingenlijst ingevuld d.d.:\Sexpr{rdata[1,4]}}
+\begin{table}[ht]
+\centering
+  \begin{tabular}{ | c | c | c | c |}
+  Feedbackgevers & Datum ingevuld & Feedbackgevers & Datum ingevuld \\ [0.5ex]
+  %heading
+  \hline
+  \color{blue}\Sexpr{f1vnaam} \Sexpr{f1data[1,2]} & \Sexpr{f1data[1,4]} &  &  \\
+   &  &  &   
+\end{tabular}
+\caption*{}
+\end{table}
+\begin{figure}[h!]
+\centering
+\includegraphics[width=180mm,height=130mm]{\Sexpr{img[179]}}
+\end{figure}
+\color{black}
+\newpage
+\tableofcontents
+\newpage
+\section{Introductie}
+\subsection*{Uitleg stellingen}
+Je hebt onlangs de 100 stellingen van de ontwikkel spiegel ingevuld. In dit rapport tref je jouw antwoorden aan gerubriceerd in verschillende onderdelen die bepalend zijn voor je persoonlijk fundament om jezelf te ontwikkelen. In deze rapportage zijn opgenomen de onderdelen `kritieke succesfactoren` : houding,gedrag,gevoel, kenmerk en effect. Hierbij hebben de eerste drie betrekking op jezelf en de laatste 2 factoren op het team en organsatie waar je werkt. Verder zijn opgenomen je ontwikkel- en koesterpunten en de verschillenanalyse met je feedbackgevers. De ontwikkelspiegel is gebaseerd op het gedachtegoed van Persoonlijk Ondernemerschap. Dit gedachtegoed staat verwoord in het boek `tien stappen op weg naar Persoonlijk Ondernemerschap` van Hans Heijnen. In hoofdstuk vier van het boek wordt de werking van de PO cockpit uitgebreid toegelicht. 
+\newline
+Je omgeving,je omstandigheden en je persoonlijke situatie veranderen voortdurend en daarmee ook jouw beeld van waar je  nu staat. De PO cockpit kun je dan ook vergelijken met het nemen van een foto van jezelf. De mate waarin je ondernemend of behoudend bent is dan ook geen kwestie van goed of fout,geschikt of ongeschikt.
+\subsection*{Uitleg antwoorden}
+De antwoorden dragen bij aan het vergroten van je zelfkennis, zelfinzicht en geven inzicht in je ontwikkelruimte als het gaat om je ondernemendheid en behoudendheid. Het ondersteunt je om op je werk zelf aan de slag te gaan met omstandigheden en mensen waar je mee van doen hebt. Je krijgt inzicht waar je het beste kunt beginnen om zo effectief een bijdrage te leveren aan de veranderingen of aan het cree\"eren van waarde voor jezelf en anderen.
+\subsection*{Uitleg verschillen}
+De verschillen tussen hoe jij jezelf ziet en hoe je feedbackgevers jou zien geven aanvullend inzicht over je zelfbeeld, je zelfkennis en je ontwikkelruimte door de ogen van de ander. Met deze inzichten ga je met je feedbackgevers in dialoog. Een dialoog niet om je gelijk te halen maar om samen vast te stellen wat de beste en meest effectieve stappen zijn om je ontwikkelruimte om te zetten in daadwerkelijk capaciteit om betekenisvol te zijn.
+\subsection*{Uitleg tabellen}
+De tabellen geven per onderdeel jouw ontwikkelruimte aan met daarbij de door de feedbackgevers aangegeven ontwikkelruimte. Het geeft je een snel inzicht in je eigen ontwikkelruimte op indicatornivo en de verschillen met je feedbackgevers, waardoor je afhankelijk van de gewenste situatie jouw groeinoodzaak kunt bepalen. De analyse op het nivo van de stellingen geven je inzicht in de meeste effectieve manier om je te ontwikkelen. Achter elke stelling tref je een grafiekbalk aan. Hierbij geeft een volle blauwe balk per stelling een hoge mate van ondernemendheid aan. Een volle oranje balk geeft een lage mate van behoudendheid aan(je laat je niet door angst leiden). De lege ruimte geeft de ontwikkelruimte weer. De mate van `vol` of `leeg` zijn wordt bepaald door jouw scores per stelling: (a)ltijd,(m)eestal,(s)oms,(i)ncidenteel,(n)ooit.
+\newline
+Neem rustig de tijd om de rapportage door te nemen en de uitkomsten op je in te laten werken.
+\newpage
+\section{Samenvatting}
+\Sexpr{rvnaam}, in de volgende tabel staan vanuit jouw eigen perspectief en die van \Sexpr{f1vnaam} alle onderdelen met het percentage ontwikkelruimte. Jouw kolom geeft aan waar jij denkt dat voor jou de meeste winst is te halen. De kolom van \Sexpr{f1vnaam} geeft aan waar zij/hij denkt dat jij de meeste winst kunt halen. Het is aan jou om te bepalen over welke onderdelen je in gesprek gaat.
+\subsection{Aangegeven ontwikkelruimte voor \Sexpr{rvnaam}}
+\begin{table}[htb]
+\caption{Aangegeven ontwikkelruimte voor\Sexpr{rvnaam}}
+\centering
+\begin{tabular}{| l | c | c |}
+\hline\hline
+Onderdeel &Ontwikkelruimte &Ontwikkelruimte \\
+ & \color{green}\Sexpr{rvnaam} & \color{blue}\Sexpr{f1vnaam}
+\\ [0.5ex]
+\hline\hline
+\Sexpr{gr$factor[1]} & \Sexpr{gr$r1[1]} \% & \Sexpr{gr$f1[1]} \% \\
+\hline
+\Sexpr{gr$factor[2]} & \Sexpr{gr$r1[2]} \% & \Sexpr{gr$f1[2]} \% \\
+\hline
+\Sexpr{gr$factor[3]} & \Sexpr{gr$r1[3]} \% & \Sexpr{gr$f1[3]} \% \\
+\hline
+\Sexpr{gr$factor[4]} & \Sexpr{gr$r1[4]} \% & \Sexpr{gr$f1[4]} \% \\
+\hline
+\Sexpr{gr$factor[5]} & \Sexpr{gr$r1[5]} \% & \Sexpr{gr$f1[5]} \% \\
+\hline
+\Sexpr{gr$factor[6]} & \Sexpr{gr$r1[6]} \% & \Sexpr{gr$f1[6]} \% \\
+\hline
+\Sexpr{gr$factor[7]} & \Sexpr{gr$r1[7]} \% & \Sexpr{gr$f1[7]} \% \\
+\hline
+\Sexpr{gr$factor[8]} & \Sexpr{gr$r1[8]} \% & \Sexpr{gr$f1[8]} \%  \\
+\hline
+\Sexpr{gr$factor[9]} & \Sexpr{gr$r1[9]} \% & \Sexpr{gr$f1[9]} \%  \\
+\hline
+\Sexpr{gr$factor[10]} & \Sexpr{gr$r1[10]} \% & \Sexpr{gr$f1[10]} \% \\
+\hline
+\Sexpr{gr$factor[11]} & \Sexpr{gr$r1[11]} \% & \Sexpr{gr$f1[11]} \% \\
+\hline
+\Sexpr{gr$factor[14]} & \Sexpr{gr$r1[14]} \% & \Sexpr{gr$f1[14]} \% \\
+\hline
+\Sexpr{gr$factor[12]} & \Sexpr{gr$r1[12]} \% & \Sexpr{gr$f1[12]} \% \\
+\hline
+\Sexpr{gr$factor[13]} & \Sexpr{gr$r1[13]} \% & \Sexpr{gr$f1[13]} \% \\
+\hline
+\Sexpr{gr$factor[15]} & \Sexpr{gr$r1[15]} \% & \Sexpr{gr$f1[15]} \% \\
+\hline
+\Sexpr{gr$factor[16]} & \Sexpr{gr$r1[16]} \% & \Sexpr{gr$f1[16]} \% \\
+\hline
+\Sexpr{gr$factor[17]} & \Sexpr{gr$r1[17]} \% & \Sexpr{gr$f1[17]} \% \\
+\hline
+\Sexpr{gr$factor[18]} & \Sexpr{gr$r1[18]} \% & \Sexpr{gr$f1[18]} \% \\
+\hline
+\Sexpr{gr$factor[19]} & \Sexpr{gr$r1[19]} \% & \Sexpr{gr$f1[19]} \%  \\
+\hline
+\Sexpr{gr$factor[20]} & \Sexpr{gr$r1[20]} \% & \Sexpr{gr$f1[20]} \%  \\ [1ex]
+\hline
+\end{tabular}
+\end{table}
+Toelichting :
+\begin{itemize}
+\item Ontwikkelruimte minder dan 20\%: stap uit je `comfort zone`, schat je risico's in en ga aan de slag.
+\item Ontwikkelruimte tussen 20\% en 40\%: ga na bij welke indicatoren je ontwikkelruimte het hoogst is en ga hiermee zelf aan de slag.
+\item Ontwikkelruimte groter dan 40\%: ga na bij welke indicatoren je ontwikkelruimte het  grootst is, ga hiermee aan de slag en laat je begeleiden.
+\end{itemize}
+\newpage
+\subsection{Constructieve en behoudende indicatoren}
+Voordat je met de 10 'R stappen' aan de slag gaat, is het nodig om inzicht te hebben in waar jij staat als het gaat om je gevoel,je gedrag en je houding en waar je organisatie of je team staat. Dit zijn meteen de kritieke succesfactoren die bepalend zijn voor het succesvol en bewust doorzien en doorlopen van de 10 'R stappen'. De factoren zijn per stap doorvertaald naar onderliggende indicatoren en gerubriceerd naar destructief en constructief. In de schema's zijn de kritische factoren gekoppeld aan de stappen en aan de vier dimensies. Aan elk schema is per stap toegevoegd wat het 'effect' op korte termijn is.
+\subsection*{Constructieve indicatoren}
+\begin{center}
+\includegraphics[width=170mm,height=100mm]{\Sexpr{img[184]}}
+\end{center}
+\Sexpr{p13}
+\subsection*{Behoudende indicatoren}
+\begin{center}
+\includegraphics[width=170mm,height=100mm]{\Sexpr{img[185]}}
+\end{center}
+\Sexpr{p131}
+\newpage
+\section{Detail resultaten van de 4 dimensies en 10 stappen}
+\subsection{Leiderschap}
+Persoonlijk Leiderschap geeft inzicht in de mate waarin je als team in staat bent gelijkwaardig sturing te geven en de mate waarin je samen met anderen `iets` tot stand brengt.
+\subsubsection{Regenboog zien}
+\includegraphics[width=\linewidth]{\Sexpr{img[101]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[1]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[2]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[7]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[8]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[3]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[4]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[5]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[6]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[9]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[10]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[111]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[112]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[113]}}
+\subsubsection{Regie voeren}
+\includegraphics[width=\linewidth]{\Sexpr{img[102]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[11]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[12]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[17]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[18]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[13]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[14]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[15]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[16]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[19]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[20]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[114]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[115]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[116]}}
+\subsubsection{Richting bepalen}
+\includegraphics[width=\linewidth]{\Sexpr{img[103]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[21]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[22]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[27]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[28]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[23]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[24]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[25]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[26]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[29]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[30]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[117]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[118]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[119]}}
+\newpage
+\subsection{Zeggenschap}
+Persoonlijk Zeggenschap geeft inzicht in de mate waarin je als team in staat bent gelijkwaardig invloed uit te oefenen en de mate waarin je samen met anderen `invloed` uitoefent.
+\subsubsection{Rust geven}
+\includegraphics[width=\linewidth]{\Sexpr{img[104]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[31]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[32]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[37]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[38]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[33]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[34]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[35]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[36]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[39]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[40]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[120]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[121]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[122]}}
+\subsubsection{Ruimte cre\"eren}
+\includegraphics[width=\linewidth]{\Sexpr{img[105]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[41]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[42]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[47]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[48]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[43]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[44]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[45]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[46]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[49]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[50]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[123]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[124]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[125]}}
+\newpage
+\subsection{Vakmanschap}
+Persoonlijk Vakmanschap geeft inzicht in de mate waarin je als team in staat bent gelijkwaardig capaciteiten te benutten en de mate waarin je in staat bent samen prestaties te leveren.
+\subsubsection{Rendement vaststellen}
+\includegraphics[width=\linewidth]{\Sexpr{img[106]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[51]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[52]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[57]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[58]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[53]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[54]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[55]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[56]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[59]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[60]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[126]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[127]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[128]}}
+\subsubsection{Resultaten boeken}
+\includegraphics[width=\linewidth]{\Sexpr{img[107]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[61]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[62]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[67]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[68]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[63]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[64]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[65]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[66]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[69]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[70]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[129]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[130]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[131]}}
+\newpage
+\subsection{Beterschap}
+Persoonlijk Beterschap geeft inzicht in de mate waarin je als team in staat bent gelijkwaardig het beste en mooiste uit jezelf en anderen te halen en de mate waarin je in staat bent samen te groeien.
+\subsubsection{Reflectie geven}
+\includegraphics[width=\linewidth]{\Sexpr{img[108]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[71]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[72]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[77]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[78]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[73]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[74]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[75]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[76]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[79]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[80]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[132]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[133]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[134]}}
+\subsubsection{Relaties onderhouden}
+\includegraphics[width=\linewidth]{\Sexpr{img[109]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[81]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[82]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[87]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[88]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[83]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[84]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[85]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[86]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[89]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[90]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[135]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[136]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[137]}}
+\subsubsection{Ruggengraat tonen}
+\includegraphics[width=\linewidth]{\Sexpr{img[110]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[91]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[92]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[97]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[98]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[93]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[94]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[95]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[96]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[99]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[100]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[138]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[139]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[140]}}
+\newpage
+\subsection*{Aanvullende opmerkingen over de resultaten op de 10 R stappen}
+\newpage
+\section{Koesterpunten van \Sexpr{rvnaam} \Sexpr{rdata[1,2]} }
+Door het inzicht in je koesterpunten word jij je bewust van je eigen constructieve behoudendheid en ondernemendheid van dit moment. De koesterpunten vormen een belangrijk fundament om zelf in beweging te komen, om je persoonlijk ondernemerschap vorm te geven en je ontwikkelruimte te benutten.
+\subsection{Koesterpunten van \Sexpr{rvnaam} \Sexpr{rdata[1,2]} - Mate van ondernemendheid}
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[51]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[1]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[2]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[3]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[4]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[5]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[6]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[7]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[8]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[9]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[10]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[11]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[12]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[13]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[14]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[15]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[16]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[17]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[18]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[19]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[20]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[21]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[22]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[23]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[24]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[25]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[26]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[27]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[28]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[29]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[30]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[31]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[32]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[33]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ko_img[34]}}
+\newline
+\Sexpr{p5}
+\newpage
+\subsection{Koesterpunten van \Sexpr{rvnaam} \Sexpr{rdata[1,2]} - Mate van behoudendheid}
+Door het inzicht in je koesterpunten word jij je bewust van je eigen constructieve behoudendheid en ondernemendheid van dit moment. De koesterpunten vormen een belangrijk fundament om zelf in beweging te komen, om je persoonlijk ondernemerschap vorm te geven en je ontwikkelruimte te benutten.
+\vspace{0.3cm}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[51]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[1]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[2]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[3]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[4]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[5]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[6]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[7]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[8]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[9]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[10]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[11]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[12]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[13]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[14]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[15]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[16]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[17]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[18]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[19]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[20]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[21]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[22]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[23]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[24]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[25]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[26]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[27]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[28]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[29]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[30]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[31]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[32]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[33]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{kb_img[34]}}
+\newline
+\Sexpr{p51}
+\newpage
+\section{Ontwikkelpunten van \Sexpr{rvnaam} \Sexpr{rdata[1,2]} }
+Door het inzicht in je ontwikkelpunten word jij je bewust van je eigen destructieve behoudendheid en ondernemendheid van dit moment. Door met je ontwikkelpunten echt aan de slag te gaan neem je zelf het heft in handen als het om het benutten van je ontwikkelruimte gaat en daarmee aan het vormgeven van jouw persoonlijk ondernemerschap.
+\subsection{Ontwikkelpunten van \Sexpr{rvnaam} \Sexpr{rdata[1,2]} - Mate van ondernemendheid}
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[51]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[1]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[2]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[3]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[4]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[5]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[6]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[7]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[8]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[9]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[10]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[11]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[12]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[13]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[14]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[15]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[16]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[17]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[18]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[19]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[20]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[21]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[22]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[23]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[24]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[25]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[26]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[27]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[28]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[29]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[30]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[31]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[32]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[33]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{oo_img[34]}}
+\newline
+\Sexpr{p6}
+\newpage
+\subsection{Ontwikkelpunten van \Sexpr{rvnaam} \Sexpr{rdata[1,2]} - Mate van behoudendheid}
+Door het inzicht in je ontwikkelpunten word jij je bewust van je eigen destructieve behoudendheid en ondernemendheid van dit moment. Door met je ontwikkelpunten echt aan de slag te gaan neem je zelf het heft in handen als het om het benutten van je ontwikkelruimte gaat en daarmee aan het vormgeven van jouw persoonlijk ondernemerschap.
+\vspace{0.3cm}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[51]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[1]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[2]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[3]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[4]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[5]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[6]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[7]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[8]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[9]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[10]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[11]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[12]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[13]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[14]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[15]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[16]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[17]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[18]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[19]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[20]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[21]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[22]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[23]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[24]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[25]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[26]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[27]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[28]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[29]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[30]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[31]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[32]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[33]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{ob_img[34]}}
+\newline
+\Sexpr{p61}
+\newpage
+\section{Verschillenanalyses ten opzichte van de feeback gevers}
+Het inzicht in de overeenkomsten en verschillen met je feedbackgever(s) geeft een beeld van hoe anderen jou waarnemen (en hoe de feedbackgever zelf waarneemt). De verschillenanalyse is een effectief hulpmiddel om in dialoog te gaan en daarmee op een andere manier met elkaar (en met jezelf) te communiceren.
+\subsection{Verschillenanalyse ten opzichte van \Sexpr{f1vnaam} \Sexpr{f1data[1,2]}}
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[51]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[1]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[2]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[3]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[4]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[5]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[6]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[7]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[8]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[9]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[10]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[11]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[12]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[13]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[14]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[15]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[16]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[17]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[18]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[19]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[20]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[21]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[22]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[23]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[24]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[25]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[26]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[27]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[28]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[29]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[30]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[31]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[32]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[33]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[34]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[35]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[36]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[37]}}
+\newline
+\includegraphics[width=\textwidth]{\Sexpr{f1_img[38]}}
+\newpage
+\section{\Sexpr{rvnaam}'s resultaten op kritieke factoren}
+\subsection{Kritieke transformatiefactoren}
+De kritieke transformatiefactoren maken je bewust dat je zelf de oorzaak bent van de omstandigheden waar je je in bevindt. Indien je in staat bent echt vanuit jezelf naar deze factoren te kijken en zelf in beweging te komen kun je zelf ook veranderen: Het begint bij jezelf!
+\vspace{0.2cm}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[167]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[1]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[41]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[78]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[4]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[14]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[43]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[63]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[94]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[19]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[20]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[168]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[169]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[170]}}
+\subsection{Kritieke vitaliteitsfactoren}
+De kritieke vitaliteitsfactoren maken jullie bewust dat vitaal zijn een keuze is en daarmee ook werkverzuim een keuze! De genoemde factoren hebben betrekking op de mate van behoudendheid als richtinggever voor de de kans op werkverzuim.
+\vspace{0.2cm}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[161]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[62]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[92]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[18]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[38]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[48]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[58]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[40]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[50]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[90]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[76]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[162]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[163]}}
+\subsection{Kritieke veranderfactoren}
+De kritieke veranderfactoren maken je bewust dat veranderen een wisselwerking is tussen jouw eigen transformatie en het team waar je werkt. De genoemde factoren geven inzicht in de mate waarin de randvoorwaarden zijn ingevuld om tot een duurzame verandering te komen binnen je team.
+\vspace{0.2cm}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[164]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[11]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[21]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[17]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[27]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[57]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[5]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[15]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[25]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[35]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[45]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[165]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[166]}}
+\newpage
+\subsection{Kritieke prestatiefactoren}
+De kritieke prestatie factoren maken je bewust dat het 'in the end' gaat om de mate waarin je in staat bent als team een prestatie te leveren. De genoemde factoren geven inzicht in de mate waarin je resultaatgericht bent ten opzichte van wie je bent en wat je wilt bereiken.
+\vspace{0.2cm}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[171]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[61]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[47]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[87]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[73]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[55]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[65]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[39]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[59]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[69]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[89]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[172]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[173]}}
+\newline
+\Sexpr{p84}
+\subsection{Kritieke waarden factoren}
+De kritieke waardefactoren maken jullie bewust dat ondernemendheid en behoudendheid een waardegedreven fundament vraagt. De factoren geven inzicht in de mate waarin je vanuit jullie natuurlijke rollen en eigen waarde bewegen.
+\vspace{0.2cm}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[174]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[81]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[7]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[97]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[3]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[13]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[23]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[53]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[9]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[79]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[99]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[175]}}
+\newline
+\includegraphics[width=\linewidth]{\Sexpr{img[176]}}
+\newpage
+\section{Bijlagen}
+\Sexpr{rvnaam}, in de volgende tabellen staan vanuit jouw eigen perspectief en die van \Sexpr{f1vnaam} alle onderdelen met hun ontwikkelruimte van hoog naar laag. Jouw tabel geeft aan waar jij denkt dat voor jou de meeste winst is te halen. De tabel van \Sexpr{f1vnaam} geeft aan waar jij volgens \Sexpr{f1vnaam} de meeste winst kunt halen. Het is aan jou om te bepalen over welke onderdelen je het gesprek aangaat.
+\subsection{\Sexpr{rvnaam}'s zelf aangegeven ontwikkelruimte}
+\begin{table}[htb]
+\caption{\Sexpr{rvnaam}'s samenvatting van het zelf aangegeven ontwikkelruimte}
+\centering
+\begin{tabular}{| l | c | c | c |}
+\hline\hline
+Onderdeel &Mate van ondernemendheid &Mate van behoudendheid &Ontwikkelruimte
+\\ [0.5ex]
+\hline\hline
+\textbf{\Sexpr{sum02$factor[1]}} & \textbf{\Sexpr{sum02$o[1]} \%} & \textbf{\Sexpr{sum02$b[1]} \%} & \textbf{\Sexpr{sum02$g[1]} \%} \\
+\hline
+\textbf{\Sexpr{sum02$factor[2]}} & \textbf{\Sexpr{sum02$o[2]} \%} & \textbf{\Sexpr{sum02$b[2]} \%} & \textbf{\Sexpr{sum02$g[2]} \%}  \\
+\hline
+\textbf{\Sexpr{sum02$factor[3]}} & \textbf{\Sexpr{sum02$o[3]} \%} & \textbf{\Sexpr{sum02$b[3]} \%} & \textbf{\Sexpr{sum02$g[3]} \%}  \\
+\hline
+\Sexpr{sum02$factor[5]} & \Sexpr{sum02$o[4]} \% & \Sexpr{sum02$b[4]} \% & \Sexpr{sum02$g[4]} \%  \\
+\hline
+\Sexpr{sum02$factor[4]} & \Sexpr{sum02$o[5]} \% & \Sexpr{sum02$b[5]} \% & \Sexpr{sum02$g[5]} \%  \\
+\hline
+\Sexpr{sum02$factor[6]} & \Sexpr{sum02$o[6]} \% & \Sexpr{sum02$b[6]} \% & \Sexpr{sum02$g[6]} \%  \\
+\hline
+\Sexpr{sum02$factor[7]} & \Sexpr{sum02$o[7]} \% & \Sexpr{sum02$b[7]} \% & \Sexpr{sum02$g[7]} \%  \\
+\hline
+\Sexpr{sum02$factor[8]} & \Sexpr{sum02$o[8]} \% & \Sexpr{sum02$b[8]} \% & \Sexpr{sum02$g[8]} \%  \\
+\hline
+\Sexpr{sum02$factor[9]} & \Sexpr{sum02$o[9]} \% & \Sexpr{sum02$b[9]} \% & \Sexpr{sum02$g[9]} \%  \\
+\hline
+\Sexpr{sum02$factor[10]} & \Sexpr{sum02$o[10]} \% & \Sexpr{sum02$b[10]} \% & \Sexpr{sum02$g[10]} \% \\
+\hline
+\Sexpr{sum02$factor[11]} & \Sexpr{sum02$o[11]} \% & \Sexpr{sum02$b[11]} \% & \Sexpr{sum02$g[11]} \% \\
+\hline
+\Sexpr{sum02$factor[12]} & \Sexpr{sum02$o[12]} \% & \Sexpr{sum02$b[12]} \% & \Sexpr{sum02$g[12]} \% \\
+\hline
+\Sexpr{sum02$factor[13]} & \Sexpr{sum02$o[13]} \% & \Sexpr{sum02$b[13]} \% & \Sexpr{sum02$g[13]} \% \\
+\hline
+\Sexpr{sum02$factor[14]} & \Sexpr{sum02$o[14]} \% & \Sexpr{sum02$b[14]} \% & \Sexpr{sum02$g[14]} \% \\
+\hline
+\Sexpr{sum02$factor[15]} & \Sexpr{sum02$o[15]} \% & \Sexpr{sum02$b[15]} \% & \Sexpr{sum02$g[15]} \% \\
+\hline
+\Sexpr{sum02$factor[16]} & \Sexpr{sum02$o[16]} \% & \Sexpr{sum02$b[16]} \% & \Sexpr{sum02$g[16]} \% \\
+\hline
+\Sexpr{sum02$factor[17]} & \Sexpr{sum02$o[17]} \% & \Sexpr{sum02$b[17]} \% & \Sexpr{sum02$g[17]} \% \\
+\hline
+\Sexpr{sum02$factor[18]} & \Sexpr{sum02$o[18]} \% & \Sexpr{sum02$b[18]} \% & \Sexpr{sum02$g[18]} \% \\
+\hline
+\Sexpr{sum02$factor[19]} & \Sexpr{sum02$o[19]} \% & \Sexpr{sum02$b[19]} \% & \Sexpr{sum02$g[19]} \% \\ 
+\hline
+\Sexpr{sum02$factor[20]} & \Sexpr{sum02$o[20]} \% & \Sexpr{sum02$b[20]} \% & \Sexpr{sum02$g[20]} \% \\ [1ex]
+\hline
+\end{tabular}
+\end{table}
+Toelichting :
+\begin{itemize}
+\item Ontwikkelruimte minder dan 20\%: stap uit je `comfort zone`, schat je risico's in en ga aan de slag.
+\item Ontwikkelruimte tussen 20\% en 40\%: ga na bij welke indicatoren je ontwikkelruimte het hoogst is en ga hiermee zelf aan de slag.
+\item Ontwikkelruimte groter dan 40\%: ga na bij welke indicatoren je ontwikkelruimte het  grootst is, ga hiermee aan de slag en laat je begeleiden.
+\end{itemize}
+\Sexpr{p101}
+\newpage
+\subsection{\Sexpr{f1vnaam}'s samenvatting van \Sexpr{rvnaam}'s ontwikkelruimte}
+\begin{table}[htb]
+\caption{\Sexpr{f1vnaam}'s samenvatting van \Sexpr{rvnaam}'s ontwikkelruimte}
+\centering
+\begin{tabular}{| l | c | c | c |}
+\hline\hline
+Onderdeel &Mate van ondernemendheid &Mate van behoudendheid &Ontwikkelruimte 
+\\ [0.5ex]
+\hline\hline
+\textbf{\Sexpr{fb02$factor[1]}} & \textbf{\Sexpr{fb02$o[1]} \%} & \textbf{\Sexpr{fb02$b[1]} \%} & \textbf{\Sexpr{fb02$g[1]} \%} \\
+\hline
+\textbf{\Sexpr{fb02$factor[2]}} & \textbf{\Sexpr{fb02$o[2]} \%} & \textbf{\Sexpr{fb02$b[2]} \%} & \textbf{\Sexpr{fb02$g[2]} \%}  \\
+\hline
+\textbf{\Sexpr{fb02$factor[3]}} & \textbf{\Sexpr{fb02$o[3]} \%} & \textbf{\Sexpr{fb02$b[3]} \%} & \textbf{\Sexpr{fb02$g[3]} \%}  \\
+\hline
+\Sexpr{fb02$factor[5]} & \Sexpr{fb02$o[4]} \% & \Sexpr{fb02$b[4]} \% & \Sexpr{fb02$g[4]} \%  \\
+\hline
+\Sexpr{fb02$factor[4]} & \Sexpr{fb02$o[5]} \% & \Sexpr{fb02$b[5]} \% & \Sexpr{fb02$g[5]} \%  \\
+\hline
+\Sexpr{fb02$factor[6]} & \Sexpr{fb02$o[6]} \% & \Sexpr{fb02$b[6]} \% & \Sexpr{fb02$g[6]} \%  \\
+\hline
+\Sexpr{fb02$factor[7]} & \Sexpr{fb02$o[7]} \% & \Sexpr{fb02$b[7]} \% & \Sexpr{fb02$g[7]} \%  \\
+\hline
+\Sexpr{fb02$factor[8]} & \Sexpr{fb02$o[8]} \% & \Sexpr{fb02$b[8]} \% & \Sexpr{fb02$g[8]} \%  \\
+\hline
+\Sexpr{fb02$factor[9]} & \Sexpr{fb02$o[9]} \% & \Sexpr{fb02$b[9]} \% & \Sexpr{fb02$g[9]} \%  \\
+\hline
+\Sexpr{fb02$factor[10]} & \Sexpr{fb02$o[10]} \% & \Sexpr{fb02$b[10]} \% & \Sexpr{fb02$g[10]} \% \\
+\hline
+\Sexpr{fb02$factor[11]} & \Sexpr{fb02$o[11]} \% & \Sexpr{fb02$b[11]} \% & \Sexpr{fb02$g[11]} \% \\
+\hline
+\Sexpr{fb02$factor[12]} & \Sexpr{fb02$o[12]} \% & \Sexpr{fb02$b[12]} \% & \Sexpr{fb02$g[12]} \% \\
+\hline
+\Sexpr{fb02$factor[13]} & \Sexpr{fb02$o[13]} \% & \Sexpr{fb02$b[13]} \% & \Sexpr{fb02$g[13]} \% \\
+\hline
+\Sexpr{fb02$factor[14]} & \Sexpr{fb02$o[14]} \% & \Sexpr{fb02$b[14]} \% & \Sexpr{fb02$g[14]} \% \\
+\hline
+\Sexpr{fb02$factor[15]} & \Sexpr{fb02$o[15]} \% & \Sexpr{fb02$b[15]} \% & \Sexpr{fb02$g[15]} \% \\
+\hline
+\Sexpr{fb02$factor[16]} & \Sexpr{fb02$o[16]} \% & \Sexpr{fb02$b[16]} \% & \Sexpr{fb02$g[16]} \% \\
+\hline
+\Sexpr{fb02$factor[17]} & \Sexpr{fb02$o[17]} \% & \Sexpr{fb02$b[17]} \% & \Sexpr{fb02$g[17]} \% \\
+\hline
+\Sexpr{fb02$factor[18]} & \Sexpr{fb02$o[18]} \% & \Sexpr{fb02$b[18]} \% & \Sexpr{fb02$g[18]} \% \\
+\hline
+\Sexpr{fb02$factor[19]} & \Sexpr{fb02$o[19]} \% & \Sexpr{fb02$b[19]} \% & \Sexpr{fb02$g[19]} \% \\ 
+\hline
+\Sexpr{fb02$factor[20]} & \Sexpr{fb02$o[20]} \% & \Sexpr{fb02$b[20]} \% & \Sexpr{fb02$g[20]} \% \\ [1ex]
+\hline
+\end{tabular}
+\end{table}
+Toelichting :
+\begin{itemize}
+\item Ontwikkelruimte minder dan 20\%: stap uit je `comfort zone`, schat je risico's in en ga aan de slag.
+\item Ontwikkelruimte tussen 20\% en 40\%: ga na bij welke indicatoren je ontwikkelruimte het hoogst is en ga hiermee zelf aan de slag.
+\item Ontwikkelruimte groter dan 40\%: ga na bij welke indicatoren je ontwikkelruimte het  grootst is, ga hiermee aan de slag en laat je begeleiden.
+\end{itemize}
+\begin{landscape}
+\newpage
+\subsection{Grafische weergave van \Sexpr{rvnaam}'s ontwikkelruimte op de 10 PO stappen}
+In onderstaande grafiek staat in het groen jouw percentage ontwikkelruimte voor iedere PO stap weergegeven. De andere lijnen zijn de scores voor jou gegeven door de feedbackgevers.
+\newline
+\includegraphics[width=270mm,height=160mm]{\Sexpr{img[179]}}
+\newpage
+\subsection{Grafische weergave van \Sexpr{rvnaam}'s ontwikkelruimte op de 5 kritieke factoren - (SPECIALS)}
+In onderstaande grafiek staat in het groen jouw percentage ontwikkelruimte voor de 5 kritieke factoren (specials). De andere lijnen zijn de scores voor jou gegeven door de feedbackgevers.
+\newline
+\includegraphics[width=270mm,height=160mm]{\Sexpr{img[182]}}
+\end{landscape}
+\end{document}

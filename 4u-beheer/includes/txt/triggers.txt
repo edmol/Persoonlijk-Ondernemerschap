@@ -1,0 +1,83 @@
+Combined "Trigger Insert Before" and "Trigger Update Before" example for Add and Change record modes. 
+
+// phpMyEdit form contains: 
+
+$opts['triggers']['insert']['before'] = 'triggers/displayname.php';
+
+$opts['triggers']['update']['before'] = 'triggers/displayname.php';
+
+require('phpMyEdit.class.php');
+
+
+
+Trigger filename: ./triggers/displayname.TIB.php
+
+Conditionally populate values in other fields in the same table 
+(an Address Book). 
+
+If the field "email1" is not empty, populate "display_name" and "nick_name"
+fields using values found in either "first_name" and "last_name" or 
+(if empty) then "company".
+
+if( !empty($newvals['email1']) ) {
+
+   if( !empty($newvals['first_name']) ) {
+
+      $newvals['display_name'] = ucwords( $newvals['first_name'].' '.$newvals['last_name'] );
+
+      $newvals['nick_name'] = ucwords( $newvals['first_name'].' '.$newvals['last_name'] );
+
+   } else if ( !empty($newvals['company']) ) {
+
+      $newvals['display_name'] = ucwords($newvals['company']);
+
+      $newvals['nick_name'] = ucwords($newvals['company']);
+
+   }
+
+}
+
+
+
+
+
+In every trigger file you have available following usable variables. Some of them affect only a particular action.
+
+$this	  object reference
+$this->dbh	  initialized MySQL database handle
+$this->key	  primary key name
+$this->key_type	  primary key type
+$this->key_delim	  primary key deliminator
+$this->rec	  primary key value (update and delete only)
+$newvals	  associative array of new values (update and insert only)
+$oldvals	  associative array of old values (update and delete only)
+$changed	  array of keys with changed values
+
+Trigger Documentation: http://platon.sk/projects/doc.php/phpMyEdit/html/configuration.triggers.html
+
+Select triggers - View form is related to 'select' operation.
+
+$opts['triggers']['select']['cancel'] = 'categories.TSC.inc'; // After canceling the view page
+$opts['triggers']['select']['pre']    = 'categories.TSP.inc'; // Before displaying the view page
+
+Insert triggers - Add and Copy forms are related to 'insert' operation
+
+$opts['triggers']['insert']['after']  = 'categories.TIA.inc'; // After requesting save or more in the add/copy page
+$opts['triggers']['insert']['before'] = 'categories.TIB.inc'; // Before requesting save or more in the add/copy page
+$opts['triggers']['insert']['cancel'] = 'categories.TIC.inc'; // After canceling the add/copy page
+$opts['triggers']['insert']['pre']    = 'categories.TIP.inc'; // Before displaying the add/copy page
+
+Update triggers - Edit form is related to 'update' operation.
+
+$opts['triggers']['update']['after']  = 'categories.TUA.inc'; // After requesting save or apply in the edit page
+$opts['triggers']['update']['before'] = 'categories.TUB.inc'; // Before requesting save or apply in the edit page
+$opts['triggers']['update']['cancel'] = 'categories.TUC.inc'; // After canceling the edit page
+$opts['triggers']['update']['pre']    = 'categories.TUP.inc'; // Before displaying the edit page
+
+Delete triggers - Delete form is related to 'delete' operation.
+
+$opts['triggers']['delete']['after']  = 'categories.TDA.inc'; // After requesting delete in the delete page
+$opts['triggers']['delete']['before'] = 'categories.TDB.inc'; // Before requesting delete in the delete page
+$opts['triggers']['delete']['cancel'] = 'categories.TDC.inc'; // After canceling the delete page
+$opts['triggers']['delete']['pre']    = 'categories.TDP.inc'; // Before displaying the delete page
+

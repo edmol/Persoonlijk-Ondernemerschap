@@ -1,0 +1,267 @@
+
+/*
+// tweak.php
+
+		switch($row[4])
+		{
+			Case '1':
+				echo_buffer("// \$opts['fdd']['".$fd."']['values2'] = array('1' => 'Yes', '0' => 'No');");
+				break;
+			Case '0':
+				echo_buffer("// \$opts['fdd']['".$fd."']['values2'] = array('0' => 'No', '1' => 'Yes');");
+				break;
+			default:
+				break;
+		};
+*/
+
+
+
+
+	# A TEXTAREA "could" also be set based on $fd_len == 255 and column type CHAR/VARCHAR
+	# if($fd_type == 'string' && $fd_len == 255){
+	#	 echo_buffer("  'textarea'   => array('rows' => 3, 'cols' => $cfg_textarea_cols),");
+	# }
+
+
+		// echo_buffer("  // NULL OR NOT NULL: ".$row[2].'*******************************');
+
+		// ($k > 0) ? echo_buffer("  'sqlw'       => 'TRIM(\"\$val_as\")',") : '';
+
+
+		// Column type specific defaults different from 
+		// those of MySQL "could" be configured here:
+		// ($fd_type == 'date') ? echo_buffer("//  'default'    => date('$cfg_datemask_date'),") : '';
+		// Best suited to fields where entries are required.
+
+
+
+/* 
+	// We could right-justify numeric cells using 'colattrs' but CSS works also.
+	// $cfg_colattrs == 1 && ($fd_type == 'int' || $fd_type == 'real') ? echo_buffer("  'colattrs|LF'   => 'align=\"right\"',") : echo_buffer("//  'colattrs|LF'   => '',");
+	// Alternate colattrs example follows:
+	$tmp = 
+		$cfg_colattrs == 1 
+		&& ($fd_type == 'int' || $fd_type == 'real') 
+		? "  'colattrs|LF'   => 'align=\"right\"'," : "//  'colattrs|LF'   => '',";
+	echo_buffer("$tmp");
+*/
+
+
+
+
+
+if($cfg_cont_table_row1 == 0){
+$buffer .= <<<MARKER200
+
+<table {$cfg_cont_table_align} border="0" class="container" cellspacing="0" cellpadding="0"> <!-- cfg_cont_table_usage = 1 -->
+
+<tr><td class="container"> <!-- Container table cell for phpMyEdit form -->
+
+<?php
+
+MARKER200;
+
+}elseif($cfg_cont_table_row1 == 1){
+
+if($cfg_cont_table_align == 0){
+
+	$cfg_cont_table_align = '';
+
+}
+
+$buffer .= <<<MARKER200
+
+<!-- Container table cell for phpMyEdit form -->
+
+<table class="container" $cfg_cont_table_align cellspacing="0" cellpadding="0">
+
+<tr><td class="container">
+
+   <?php echo isset(\$operation) ? '<p class="pme-message">'.\$operation.'</p>' : '<p>&nbsp;</p>'; ?>
+
+<?php
+
+MARKER200;
+}
+
+
+}else{
+
+	$buffer .= <<<MARKER200
+
+<?php
+echo isset(\$operation) ? '<p class="pme-message">'.\$operation.'</p>' : '<p>&nbsp;</p>';
+MARKER200;
+};
+
+
+/**
+ * DISCONTINUED
+ * Messages appearing in the last row of container table, below 
+ * phpMyEdit form are dependent upon $cfg_cont_table_usage == 1;
+*/
+
+/*
+if($cfg_cont_table_usage == 1){
+
+	// End the container table cell/row begun above the phpMyEdit form
+
+	echo_buffer("</td></tr> <!-- phpMyEdit form above -->");
+
+	if($cfg_cont_table_row3 == 1 && !empty($cfg_comment_1_text)){
+
+		echo_buffer("<tr><td class=\"pme-message\"> <!-- cfg_cont_table_row3 = 1 -->".$lf);
+
+		echo_buffer($cfg_comment_1_text);
+
+		echo_buffer($lf."</td></tr>"); // End 2nd row of container table.
+
+	}else{
+
+		echo_buffer("<!-- ".$lf."<tr><td class=\"pme-message\">".$lf.$lf."</td></tr>".$lf."-->");
+
+	}
+
+	echo_buffer($lf."</table> <!-- End container table -->");
+
+};
+*/
+
+/*
+if($cfg_footer != 'omit'){
+
+	if(file_exists($cfg_footer)) {
+
+		require($cfg_footer); // Adds footer to buffer.
+
+	}else{
+
+		die('Unable to locate required file: '.$cfg_footer);
+
+	}
+
+}
+*/
+
+
+
+
+
+
+// $cfg_help_ACP_link = '<a href="./popup.php?tb=%s&amp;col=%s" target="_blank" onclick="openWinHelp(\\\'./popup.php?tb=%s&amp;col=%s\\\',\\\'Help\\\',\\\'width=640,height=480,menubar=yes,scrollbars=yes\\\');return false;" onMouseOver="window.status=\\\'Help\\\';return true;" onMouseOut="window.status=\\\'\\\';return true;">Help</a>';
+
+$cfg_help_ACP_link = <<<HEREDOC_VAR
+<a href="./popup.php?tb=%s&amp;col=%s" target="_blank" onclick="openWinHelp(\'./popup.php?tb=%s&amp;col=%s\',\'Help\',\'width=640,height=480,menubar=yes,scrollbars=yes\');return false;" onMouseOver="window.status=\'Help\';return true;" onMouseOut="window.status=\'\';return true;">Help</a>
+HEREDOC_VAR;
+
+
+
+Contains experimental clips of code that were removed from generator.inc.php
+
+		Case 'int':
+
+			/*
+
+			// Intended for Unix timestamps
+
+			if($fd_len > 9){
+
+				echo_buffer("//  'sql|LFV'     => 'if($fd > \"\", CONCAT(DATE_FORMAT($fd, \"%a %b %e %Y %h:%i %p\")), \"\")',");
+
+				echo_buffer("// \$opts['fdd']['{$fd}']['strftimemask'] = '%c';");
+
+			}
+
+			*/
+
+			break;
+
+
+		Case 'time':
+
+			echo_buffer("// Possible option: 'default'    => date('$cfg_datemask_time'),");
+
+			echo_buffer("//  'sql|LFV'     => 'if($fd > \"00:00:00\", CONCAT(TIME_FORMAT($fd, \"%h:%i %p\")), \"\")', // Possible datemask replacement");
+
+			// echo_buffer("// or possibly delete the 'datemask' and uncomment this ...");
+
+			// echo_buffer("// \$opts['fdd']['{$fd}']['sql|VL'] = 'if({$fd} > \"00:00:00\", CONCAT(TIME_FORMAT({$fd}, \"%h:%i %p\")), \"\")';");
+
+			break;
+
+
+
+		Case 'datetime':
+
+			echo_buffer("// Possible option: 'default'    => date('$cfg_datemask_timestamp'),");
+
+			// Make dependent on Add mode (date entered)
+
+			// echo_buffer("// \$opts['cgi']['overwrite']['".$fd."'] = date('$cfg_datemask_timestamp');");
+
+			break;
+
+
+
+/*
+
+// Optionally include field list in generated forms (commented-out).
+
+$col_list = implode(', ', $field_array);
+
+echo_buffer("$lf");
+
+echo_buffer("// Field list: $col_list");
+
+*/
+
+
+/*
+
+# Optionally include commented-out $variables list in generated forms.
+
+$col_list = '';
+
+reset($field_array);
+
+foreach($field_array as $var) {
+
+	$col_list .= '$'.$var.', ';
+
+}
+
+$col_list = substr($col_list, 0, -2);
+
+echo_buffer("$lf");
+
+echo_buffer("// Variables list: $col_list");
+
+*/
+
+
+/*
+
+# Optionally include a commented-out ['sort_field'] array listing all fields in the table.
+
+$tmp = '';
+
+reset($field_array); // List by column number
+
+// natcasesort($field_array); // Optionally sorted
+
+foreach($field_array as $var) {
+
+	$tmp .= '\''.$var.'\', ';
+
+}
+
+$tmp = substr($tmp, 0, -2);
+
+echo_buffer("$lf");
+
+echo_buffer("// \$opts['sort_field'] = array($tmp);");
+
+$tmp = '';
+
+*/

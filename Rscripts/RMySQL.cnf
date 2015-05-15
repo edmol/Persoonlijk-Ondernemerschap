@@ -1,0 +1,25 @@
+# parameter voor de MySQL reflectie database
+# Deze file wordt aangeroepen door RMySQL in
+# default.file=/var/www/Lime_MySQL.cnf
+# voorbeeld = dbConnect('MySQL',defaul.file = "/var/www/Lime_MySQL.cnf, group = "reflectie")
+[tsttoets]
+user = root
+database = reflectie
+password = spiegel2013
+host = localhost
+[toetsen]
+user = root
+database = potoets
+password = spiegel2013
+host = localhost
+[prdtoets]
+user = root
+database = potoets
+password = spiegel2013
+host = localhost
+[prdhist]
+user = root
+database = historie
+password = spiegel2013
+host =localhost
+

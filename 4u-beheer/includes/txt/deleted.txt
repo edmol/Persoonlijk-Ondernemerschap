@@ -1,0 +1,32 @@
+When creating tables, consider creating a field named 'deleted'.
+You might want to make this the last field in the table.
+
+This facilitates flagging records as deleted, via a trigger.
+
+For List mode, display only records whose default value is 0.
+Below the table definition, filter the selected records with:
+
+	$opts['filters'] = 'deleted = "0"';
+
+The generated field array for 'deleted'should resemble:
+
+	$opts['fdd']['deleted'] = array(
+	   'default' => '0',
+	   'input' => '',
+	   'name' => 'Deleted',
+	   'options' => '',
+	   'required' => true,
+	   'select' => 'T',
+	   'size|ACP' => 1,
+	   'sort' => true
+	);
+	// Column type: int - tinyint(1)
+
+Below the above field array, add:
+
+	$opts['triggers']['delete']['before'] = 'triggers/mark_as_deleted.TDB.inc';
+
+A utility such as phpMyAdmin can subsequently be utilized to
+reactivate "deleted" records.
+
+The `deleted` field might also be an ENUM field and use mark_as_deleted_y.TDB.inc

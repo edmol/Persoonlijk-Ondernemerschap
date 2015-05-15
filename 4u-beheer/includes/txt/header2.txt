@@ -1,0 +1,24 @@
+As configured, the db connection is made before the header is included.
+If you had some reason to query the db before displaying the form,
+and if you need to do this for all tables, then you can do it in
+the included header file.
+
+Checking $_GET['PME_sys_rec'] would pretty well limit the query to 
+take place in Add, Change, and coPy modes.
+
+$link_heading = 'hello';
+
+if(isset($_GET['PME_sys_rec']) && $_GET['PME_sys_rec'] !=''){
+
+	if($row = mysql_fetch_row(mysql_query('SELECT `name`, `hex` FROM `demo_colors` LIMIT 1'))){
+
+	   $link_heading .= ' - '.stripslashes(trim($row[0])).($row[0] != $row[1] ? ' - '.stripslashes(trim($row[1])) : '');
+
+	}else{
+
+	   $link_heading .= mysql_error();
+
+	}
+
+}
+

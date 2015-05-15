@@ -1,0 +1,61 @@
+ The 'join' option available in the CVS version of the class file leaves me somewhat confused. In List mode of the 'article' table shown below, I would like to configure a virtual (dummy) field that takes 'article.title_id' to the 'author_links' table and then displays 'author_links.author_id' in the dummy field (or the author's name from the 'author' table if it is possible to carry the lookup one step further). Thanks in advance for any reply.
+
+Code:
+CREATE TABLE `author_links` (
+  `title_id` int(11) NOT NULL default '0',
+  `author_id` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`title_id`,`author_id`),
+  KEY `title_id` (`title_id`),
+  KEY `author_id` (`author_id`)
+) TYPE=MyISAM;
+
+CREATE TABLE `author` (
+  `author_id` int(11) NOT NULL auto_increment,
+  `name` varchar(150) NOT NULL default '',
+  `personal_names` varchar(50) default NULL,
+  `dob_dod` varchar(10) default NULL,
+  `appr_y_n` tinyint(1) NOT NULL default '1',
+  `approved_author` varchar(100) default NULL,
+  `appr_author_id` int(11) default NULL,
+  PRIMARY KEY  (`author_id`),
+  KEY `name` (`name`)
+) TYPE=MyISAM;
+
+CREATE TABLE `article` (
+  `title_id` int(11) NOT NULL auto_increment,
+  `material` char(1) NOT NULL default 'J',
+  `title` varchar(255) NOT NULL default '',
+  `journal_title` varchar(255) NOT NULL default '',
+  `monograph_title` varchar(255) default NULL,
+  `series_title` varchar(255) default NULL,
+  `place_publ` varchar(40) default NULL,
+  `publisher` varchar(200) default NULL,
+  `publish_date` varchar(20) NOT NULL default '',
+  `vol_no` varchar(15) default NULL,
+  `pp` varchar(20) default NULL,
+  `notes` text,
+  PRIMARY KEY  (`title_id`),
+  KEY `journal_title` (`journal_title`),
+  KEY `title` (`title`),
+  KEY `title_id` (`title_id`)
+) TYPE=MyISAM;
+
+
+ 
+michal     Joined: 17 Jun 2003   Posts: 222   Location: Slovakia
+Post Posted: 16 Sep 2004 01:00
+Back to top  Reply with quote  Edit/Delete this post  Delete this post  View IP of poster
+
+well, isn't 'values' option sufficient? (and create dummy field for article.title_id using 'sql', if needed). or i misunderstood something ? 
+
+$opts['fdd']['dummy1'] = array(
+  'input'   => 'VR',
+  'options' => '',
+  'values'  => Array(
+    'table'       => $join_table,
+    'column'      => 'title_id',
+    'description' => 'author_id',
+    'join'        => '$main_table.$main_column = $join_table.$join_column AND $main_table.$main_column = $join_table.$join_column'
+  )
+);
+

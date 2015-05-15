@@ -1,0 +1,321 @@
+
+R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
+Copyright (C) 2013 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> # 
+> # TEAM processing - lees en verwerk aanvragen van team spiegels
+> #                   Aanvragen staan in db teamspiegels
+> #                   Historie staat in teamhistorie
+> #
+> # Stap 1 : Declareer MYSQL database connecties
+> #
+> require(RMySQL)
+Loading required package: RMySQL
+Loading required package: DBI
+> driver <- MySQL(max.con=100, force.reload = TRUE)
+> teamspiegels  <-dbConnect(driver,username="root",password="spiegel2013",dbname="potoets",host="localhost")
+> ###################################################################################
+> # ZET PRODUCTIE OF TEST VARIABELE HIER !!!!!!!!!!!!!!!!!!!!!!!!!!
+> ###################################################################################
+> ontwikkel <- "N" 
+> #################################################################################
+> if (ontwikkel == "Y")  {
++   dirgraph <- '/Library/Webserver/Documents/wp-content/gallery/porapporten/'
++   default_images <- '/Library/Webserver/Documents/Rscripts/images/'
++   functie_map <- "/Library/Webserver/Documents/Rscripts/functies/"
++   data_map     <- "/Library/Webserver/Documents/Rscripts/data/"
++   data_file    <- "toets-po-cockpit.csv"
++ } else
++ { 
++   dirgraph <- '/var/www/4u-change.com/web/wp-content/gallery/porapporten/'
++   default_images <- '/var/www/Rscripts/images/'
++   functie_map <- "/var/www/Rscripts/functies/"
++   data_map     <- "/var/www/Rscripts/data/"
++   data_file    <- "toets-po-cockpit.csv"
++ }
+> #
+> #  LOKAAL TESTMAPPEN AANMAKEN EN GEBRUIKEN 
+> #
+> #
+> # Verschillende variabelen
+> #
+> hoofddir = '/var/www/4u-change.com/web/wp-content/gallery/porapporten/'
+> #hoofddir = '/home/edmol/porapporten/'
+> #
+> # Stap 2 : Definieer de benodigde tabellen in de databases
+> #
+> teamspiegeltabel <- "teamspiegel01"
+> teamhistorietabel <- "teamspiegel01_historie"
+> statusspiegels <- "statusspiegels01_historie"
+> #
+> # ------------------------------------------------------------------------------------------------
+> # Algemene functies
+> # ------------------------------------------------------------------------------------------------
+> source(paste(functie_map,"algemene-functies.R",sep=""))
+> #
+> # Einde functies
+> #
+> # ------------------------------------------------------------------------------------------------
+> # Stap 3 : Maak nu sets aan zodat we kunnen kijken of er nieuwe teams zijn die we willen verwerken
+> # ------------------------------------------------------------------------------------------------
+> #
+> spiegels = dbGetQuery(teamspiegels,statement=paste('select * from ',teamspiegeltabel,' where teamID!=0',sep=""))
+Warning message:
+In mysqlExecStatement(conn, statement, ...) :
+  RS-DBI driver warning: (unrecognized MySQL field type 7 in column 47 imported as character)
+> historie = dbGetQuery(teamspiegels,statement=paste('select * from ',teamhistorietabel,' where teamID!=0',sep=""))
+Warning message:
+In mysqlExecStatement(conn, statement, ...) :
+  RS-DBI driver warning: (unrecognized MySQL field type 7 in column 47 imported as character)
+> #
+> # ------------------------------------------------------------------------------------------------
+> # Stap 4 : Bepaal het verschil tussen teams database en historie
+> # ------------------------------------------------------------------------------------------------
+> #
+> finalnum <- (nrow(spiegels)-nrow(historie))
+> #
+> # Als er geen verschillen zijn dan stoppen bye
+> #
+> if (finalnum < 1) 
++ {
++   dbDisconnect(teamspiegels)
++   dbUnloadDriver(driver)
++   stop("geen nieuwe aanvraag voor teamrapporten")
++ }
+> # ------------------------------------------------------------------------------------------------
+> # Stap 5 : Nu de werkelijke records ophalen.
+> # ------------------------------------------------------------------------------------------------
+> verwerken <- rows.in.tokenresults.that.are.not.in.historieresults(spiegels,historie)
+> aantalteverwerken <- nrow(verwerken)
+> for (rapport in 1 : aantalteverwerken)
++ {
++ # Stap A : Haal gegevens op en bepaal de grote van het team
++ #          De grote is van belang voor het aanroepen van het juiste Team Spiegel programma
++ #
++ # Om de teambegeleider en variabele teksten op te kunnen halen moeten we bij de aanroep van het rapport 
++ # het id van het team record meegeven
++ #
++  teamrecord <- verwerken[rapport,1]
++  #
++  # Als het tweede item de foreing key bevat dan hier eerst de organisatie naam uit de tabel halen
++  org_record <- dbGetQuery(teamspiegels,statement=paste('select * from organisaties WHERE bid=',"'",verwerken[rapport,2],"'",sep=""))
++  if (ncol(org_record)==0) 
++  {
++    organisatie <- ' '
++  } else
++  {
++    organisatie <- gsub("[^0-9A-Za-z///' ]", "", org_record[1,2])
++    organisatie <- gsub(" ","-",organisatie,fixed=TRUE)
++  }
++  aantalteamleden <- 0
++  foutcode <- 0 
++  #
++  # Het aantal is nu bepaald. Nu gaan we bij ieder teamlid de juiste data zoeken
++  # De inhoud geeft de directory aan in /var/www/4u-change.com/web/wp-content/gallery/porapporten
++  # In deze directory staan minimaal twee bestanden 
++  # Bestand 1 : eindigd op .naam
++  # Bestand 2 : eindigd op .data
++  #
++  # Check of alle directories bestaan en bestanden aanwezig zijn
++  #
++  for (teamlid in 1:8)
++  {
++    if (nchar(verwerken[rapport,teamlid+2])!=0  & !is.na(verwerken[rapport,teamlid+2]))
++      {
++      aantalteamleden <- aantalteamleden + 1
++      checkdir <- paste(hoofddir,verwerken[rapport,teamlid+2],sep="")
++      #
++      # Kijken of directorie bestaat anders gaat het niet goed
++      #
++      if (file.exists(checkdir))
++        {
++        #
++        # De directory bestaat dus nu gaan we kijken of de 
++        # bestanden aanwezig zijn
++        #
++        databestand <- paste(checkdir,'/',verwerken[rapport,teamlid+2],'.data',sep="")
++        naambestand <- paste(checkdir,'/',verwerken[rapport,teamlid+2],'.naam',sep="")
++        if (file.exists(databestand) && file.exists(naambestand))
++        {
++          # alles ok - nu data bestanden laden en klaarzetten
++          if (aantalteamleden==1)
++          {
++             t1results <- as.matrix(read.table(databestand))
++             t1data    <- as.matrix(read.table(naambestand))
++             t1token   <- verwerken[rapport,teamlid+2]
++             t1naam    <- t1data[1]
++             suffix    <- "01"
++             team_tfo <- "team-01-tfo.Rnw"
++             team_tv1 <- "team-01-tv1.Rnw"
++             team_tf  <- "team-01-tf.Rnw"
++             team_to  <- "team-01-to.Rnw"
++          }
++          if (aantalteamleden==2)
++          {
++             t2results <- as.matrix(read.table(databestand))
++             t2data    <- as.matrix(read.table(naambestand))
++             t2token   <- verwerken[rapport,teamlid+2]
++             t2naam    <- t2data[1]
++             suffix    <- "02"
++             team_tfo <- "team-02-tfo.Rnw"
++             team_tv1 <- "team-02-tv1.Rnw"
++             team_tf  <- "team-02-tf.Rnw"
++             team_to  <- "team-02-to.Rnw"
++          }
++          if (aantalteamleden==3)
++          {
++             t3results <- as.matrix(read.table(databestand))
++             t3data    <- as.matrix(read.table(naambestand))
++             t3token   <- verwerken[rapport,teamlid+2]
++             t3naam    <- t3data[1]
++             suffix    <- "03"
++             team_tfo <- "team-03-tfo.Rnw"
++             team_tv1 <- "team-03-tv1.Rnw"
++             team_tf  <- "team-03-tf.Rnw"
++             team_to  <- "team-03-to.Rnw"
++          }
++          if (aantalteamleden==4)
++          {
++            t4results <- as.matrix(read.table(databestand))
++            t4data    <- as.matrix(read.table(naambestand))
++            t4token   <- verwerken[rapport,teamlid+2]
++            t4naam    <- t4data[1]
++            suffix    <- "04"
++            team_tfo <- "team-04-tfo.Rnw"
++            team_tv1 <- "team-04-tv1.Rnw"
++            team_tf  <- "team-04-tf.Rnw"
++            team_to  <- "team-04-to.Rnw"
++          }
++          if (aantalteamleden==5)
++          {
++            t5results <- as.matrix(read.table(databestand))
++            t5data    <- as.matrix(read.table(naambestand))
++            t5token   <- verwerken[rapport,teamlid+2]
++            t5naam    <- t5data[1]
++            suffix    <- "05"
++            team_tfo <- "team-05-tfo.Rnw"
++            team_tv1 <- "team-05-tv1.Rnw"
++            team_tf  <- "team-05-tf.Rnw"
++            team_to  <- "team-05-to.Rnw"
++          }
++          if (aantalteamleden==6)
++          {
++            t6results <- as.matrix(read.table(databestand))
++            t6data    <- as.matrix(read.table(naambestand))
++            t6token   <- verwerken[rapport,teamlid+2]
++            t6naam    <- t6data[1]
++            suffix    <- "06"
++            team_tfo <- "team-06-tfo.Rnw"
++            team_tv1 <- "team-06-tv1.Rnw"
++            team_tf  <- "team-06-tf.Rnw"
++            team_to  <- "team-06-to.Rnw"
++          }
++          if (aantalteamleden==7)
++          {
++            t7results <- as.matrix(read.table(databestand))
++            t7data    <- as.matrix(read.table(naambestand))
++            t7token   <- verwerken[rapport,teamlid+2]
++            t7naam    <- t7data[1]
++            suffix    <- "07"
++            team_tfo <- "team-07-tfo.Rnw"
++            team_tv1 <- "team-07-tv1.Rnw"
++            team_tf  <- "team-07-tf.Rnw"
++            team_to  <- "team-07-to.Rnw"
++          }
++          if (aantalteamleden==8)
++          {
++            t8results <- as.matrix(read.table(databestand))
++            t8data    <- as.matrix(read.table(naambestand))
++            t8token   <- verwerken[rapport,teamlid+2]
++            t8naam    <- t8data[1]
++            suffix    <- "08"
++            team_tfo <- "team-08-tfo.Rnw"
++            team_tv1 <- "team-08-tv1.Rnw"
++            team_tf  <- "team-08-tf.Rnw"
++            team_to  <- "team-08-to.Rnw"
++          }
++        } else { foutcode <- 1 } # End Else beide bestand bestaan in dir
++      } else { foutcode <- 2 } # End Else Directory bestaat niet
++     } # Endif check teamlid file of hij leeg is of gevuld
++  } # Endfor alle 8 records - gecheckt
++  #
++  # Foutcodes : 1 - Directory bestaat wel maar niet de juiste bestanden  
++  #             2 - Directory bestaat niet onjuist teamlid opgegeven
++  if (foutcode == 0)
++  {
++    #
++    # voordat we het rapport gaan maken moeten we hem in een directory zetten
++    # Als deze niet bestaat maken we hem aan in de hoofddirectory
++    #
++    folder <- paste(hoofddir,organisatie,'/',sep="" )
++    if (file.exists(folder)){
++    } else {
++      dir.create(file.path(hoofddir, organisatie),mode = "0777")
++    }
++    #
++    # nu een subfolder maken zodat de team rapportage in de 
++    # tijd uniek blijft.
++    #
++    newdir <- paste('team',suffix,'-',format(Sys.time(),'%d%m%y%H%M%S'),sep="")
++    dir.create(file.path(folder,newdir),mode = "0777")
++    folder <- paste(folder,newdir,'/',sep="")
++    setwd(folder)
++    #
++    # Op basis van aantal teamleden Sweave aanroepen
++    #
++    #
++    historierecord <- dbGetQuery(teamspiegels,statement=paste('select * from ',teamspiegeltabel,' where teamID=',"'",verwerken[rapport,1],"'",sep=""))
++    #
++    # Maak status record aan in tabel statusspiegels
++    # 
++    statusrecord <- historierecord
++    maxrecordid <- dbGetQuery(teamspiegels, "SELECT MAX(teamID) FROM statusspiegels01_historie")[1,1]
++    statusrecord[1,1] <- maxrecordid + 1
++    statusrecord[1,48] <- format(Sys.time(),'%d-%m-%Y %H:%M:%S')
++    statusrecord[1,11] <- paste(organisatie,'/',newdir,'/',sep="")
++    dbWriteTable(teamspiegels,statusspiegels,statusrecord,row.names=FALSE,append=TRUE)
++    dbWriteTable(teamspiegels,teamhistorietabel,historierecord,row.names=FALSE,append=TRUE)
++    #
++    #
++    sweavefile <- paste(functie_map,"/",team_tv1,sep="")
++    Sweave(sweavefile) 
++    sweavefile <- paste(functie_map,"/",team_tf,sep="")
++    Sweave(sweavefile) 
++    sweavefile <- paste(functie_map,"/",team_to,sep="")
++    Sweave(sweavefile) 
++    sweavefile <- paste(functie_map,"/",team_tfo,sep="")
++    Sweave(sweavefile) 
++   #
++   # Als dit record verwerkt is dan schrijven naar historie bestand ( tijdens testen NIET !!)
++   #  
++  }
++ }
+> # endfor alle teamaanvragen 
+> #########################
+> # Database sluiten      #
+> #########################
+> dbDisconnect(teamspiegels)
+[1] TRUE
+> dbUnloadDriver(driver)
+[1] TRUE
+> 
+> proc.time()
+   user  system elapsed 
+  0.554   0.070   0.634 

@@ -1,0 +1,81 @@
+\documentclass{article}
+
+\begin{document}
+\SweaveOpts{concordance=FALSE}
+\SweaveOpts{echo=FALSE}
+Hallo daar we gaan eerst een connectie maken met de limesurvey database.\\
+En dan printen we de structuur van database, dus de tabellen.
+<<>>=
+#################################################
+# Parameter settings voor database connectie    #
+# Ook later working directory zetten            #
+#################################################
+
+require(RMySQL)
+driver <- MySQL()
+db_parmfile <- "/var/www/RMySQL.cnf"
+@
+<<>>=
+#################################################
+# Specifieke database kiezen en connectie maken #
+#################################################
+database <- "reflectie"
+tokentable <- "lime_tokens_75195"
+token <- "ed.mol@persoonlijk-ondernemerschap.nl"
+con=dbConnect(driver, default.file = db_parmfile, group = database)
+@
+<<>>=
+##################################################
+# Voorbeeld van opbouw van SQL met variabele      #
+# zoek token ed.mol@persoonlijk-ondernemerschap.nl#
+# en ingevuld op Y in lime_tokens                 #
+###################################################
+dbListTables(con)
+@
+Velden van lime tokens tabel
+<<>>=
+dbListFields(con,tokentable)
+@
+<<echo=FALSE>>=
+################################################################################
+# Check of het e-mail adres en een ingevulde survey aanwezig is in de database #
+################################################################################
+query01 <- paste('select * from ',tokentable,' where email=','"',token,'"',sep="")
+answers = dbGetQuery(con,statement=query01)
+filled_survey <- answers[1,11]
+filled_survey == "Y"
+@
+laat resultaten zien.
+<<>>=
+################################################################################
+# Check of het opgehaalde dataframe data bevat.                                #
+################################################################################
+list(answers)
+filled_survey
+var <- answers[1,4]
+@
+Hallo dit is een test we gaan nu \Sexpr{var} in een list zetten.
+\begin{itemize}
+  \item item1
+  \item 
+<<>>=
+answers[1,4]
+@
+\end{itemize}
+
+Nu een variabele buiten de code chunks halen, $var=\Sexpr{var}$. \newpage
+En een plot met variabelen maken.
+
+<<width=7, height=7,fig=TRUE>>=
+x <- 4
+y <- 5
+plot(x,y)
+@
+/newline
+Close database : 
+<<>>=
+dbDisconnect(con)
+@
+
+\end{document}
+

@@ -1,0 +1,38 @@
+<?php 
+
+/**
+ * Link to View mode for each record 'id' number.
+ * Possibly placed in form footers.
+ * Assumes 'id' field exists as unique identifier.
+ */
+
+if(!mysql_connect($opts['hn'],$opts['un'],$opts['pw'])) {
+
+   die('Unable to connect');
+
+}
+
+if(!mysql_select_db($opts['db'])) {
+
+   die('Database not selected');
+
+}
+
+$i = 0;
+
+$res = @mysql_query("SELECT id FROM {$opts['tb']} ORDER BY id");
+
+$num_rows = @mysql_num_rows($res);
+
+while($row = @mysql_fetch_array($res, MYSQL_NUM)){ 
+
+   $i++;
+
+   echo '<a href="'.basename($_SERVER["PHP_SELF"]).'?operation=View&rec='.$row[0].'">'.$i.'</a>';
+
+   echo $i != $num_rows ? ' | ' : '' ;
+
+}
+
+?>
+

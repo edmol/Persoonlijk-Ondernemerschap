@@ -1,0 +1,62 @@
+Notes regarding phpMyEdit 5.4 enhancements.
+
+$opts['page_name'] = 'index.php';
+
+$opts['display']['tabs'] = false;
+
+$opts['url'] = array('images' => 'images/'); 
+
+$opts['display']['sort'] = true;
+
+configuration.triggers.html
+
+$opts['fdd']['col_name']['escape'] = false;
+
+$opts['fdd']['col_name']['values']['description']['divs'][-1] can be used. 
+It will precede $opts['fdd']['col_name']['values']['description']['columns'][0] column.
+
+$opts['fdd']['col_name']['colattrs'] = 'align="center"';
+
+$opts['fdd']['col_name']['size']   = '10';
+$opts['fdd']['col_name']['size|F'] = '5'; // only 5 for filter
+
+
+$opts['fdd']['col_name']['maxlen'] = '8';
+$opts['fdd']['col_name']['maxlen'] = '24'; 
+
+
+$opts['fdd']['col_name']['URLprefix'] = array('http://', 'ftp://'); 
+
+Example 4-30. Write SQL expressions
+
+$opts['fdd']['surname']['sqlw'] = 'UPPER($val_qas)';
+
+$opts['fdd']['title']['sqlw'] = 'TRIM("$val_as")';
+
+The first example above makes surname uppercase when storing field into database. The second one trims all whitespace characters around title before writing it to database.
+
+As a placeholder for the field's content, there are three variables available.
+
+  $val   -- value of the field
+  $val_as   -- value with addslashes() function applied
+  $val_qas   -- same as $val_as with quotes around
+
+If the $val is some"nice"thing, then $val_as becomes some\"nice\"thing and $val_qas becomes "some\"nice\"thing". You have to use these variables correctly in your ['sqlw'] expressions, otherwise a MySQL parsing error could occur. We recommend you use the $val_qas variable whenever possible, as it is the safest one from the mentioned alternatives.
+
+A very useful and favourite usage of the ['sqlw'] option is to explicitly tell phpMyEdit to store a NULL value instead of an empty string for the particular column. Empty string and NULL are two different values. Many people really do not like empty strings in their tables, thus now they have possibility to change them to NULL when user simply enters nothing into form input field. 
+
+Example 4-31. Storing NULL instead of empty string
+
+$opts['fdd']['col_name']['sqlw'] = 'IF($val_qas = "", NULL, $val_qas)';
+
+Another example of the ['sqlw'] usage is the storage of user passwords. It is good idea to process user password using some well-known hash function before saving it in the database. Following statement is used in order to avoid re-hashing an already hashed string. This means, if col_name value was not changed, then do not apply MD5() on it. If col_name value was changed, then apply MD5() function.
+
+Example 4-32. Storing password's MD5 hash
+
+$opts['fdd']['col_name']['sqlw'] = 'IF(col_name = $val_qas, $val_qas, MD5($val_qas))';
+
+If the above does not work then try this:
+
+$opts['fdd']['col_name']['sqlw'] = 'IF(col_name = $val, $val, MD5($val))';
+
+

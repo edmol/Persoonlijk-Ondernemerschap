@@ -1,0 +1,125 @@
+
+R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
+Copyright (C) 2013 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> #                     RUN SURVEY 27137 R SCRIPT VOOR TOETS je invloed op onderling vertrouwen
+> # 
+> # Require van packages ! Deze moeten vooraf geinstalleerd zijn
+> #
+> #
+> require(graphics)
+> # Database variabelen
+> #
+> require(RMySQL)
+Loading required package: RMySQL
+Loading required package: DBI
+> driver <- MySQL(max.con=100, force.reload = TRUE)
+> db_parmfile <- "/var/www/Rscripts/RMySQL.cnf"
+> #
+> survey <- '27137'
+> #
+> ###################################################################################
+> # ZET PRODUCTIE OF TEST VARIABELE HIER !!!!!!!!!!!!!!!!!!!!!!!!!!
+> ###################################################################################
+> ontwikkel <- "N" 
+> #################################################################################
+> if (ontwikkel == "Y")  {
++   toetsgrp <- 'tsttoets'
++   histgrp  <- 'tsthist'
++   dirgraph <- '/var/www/wp-content/gallery/'
++   meangraph <- '/var/www/wp-content/gallery/mean/'
++ } else
++ { 
++   toetsgrp <- 'toetsen'
++   histgrp  <- 'prdhist'
++   dirgraph <- '/var/www/4u-change.com/web/wp-content/gallery/'
++   meangraph <- '/var/www/4u-change.com/web/wp-content/gallery/mean/'
++ }
+> # ------------------------------------------------------------------------------------------------
+> # Tokentabel is de tabel in limesurvey met de naam lime_tokens_xxxxx en bevat de tokens
+> # resulttabel is de tabel in limesurvey met de naam lime_survey_xxxxx en bevat de resultaten
+> # ------------------------------------------------------------------------------------------------
+> tokentable <- paste('lime_tokens_',survey,sep="")
+> resulttable <- paste('lime_survey_',survey,sep="")
+> # ------------------------------------------------------------------------------------------------
+> # Opmaken database connectie met survey en historiedatabase
+> # ------------------------------------------------------------------------------------------------
+> surveydb=dbConnect(driver, default.file = db_parmfile, group = toetsgrp)
+> historiedb=dbConnect(driver, default.file=db_parmfile, group = histgrp)
+> # ------------------------------------------------------------------------------------------------
+> # Algemene functies
+> # ------------------------------------------------------------------------------------------------
+> saveg <- function (fn, width = 5, height=5, pointsize = 12)
++ {
++     dev.copy(device=pdf, file=paste(fn,".pdf",sep=""),
++              width=width, height=height,pointsize=pointsize)
++     dev.off()
++     dev.copy(device=postscript, file=paste(fn,".ps",sep=""),
++              width=480, height=480, pointsize=pointsize)
++     dev.off()
++ }
+> rows.in.tokenresults.that.are.not.in.historieresults  <- function(tokenresults,historieresults)
++ {
++   tokenresults.vec <- apply(tokenresults, 1, paste, collapse = "")
++   historieresults.vec <- apply(historieresults, 1, paste, collapse = "")
++   tokenresults.without.historieresults.rows <- tokenresults[!tokenresults.vec %in% historieresults.vec,]
++   return(tokenresults.without.historieresults.rows)
++ }
+> #########################################################################################################
+> # Einde functies
+> #########################################################################################################
+> #
+> # X-labels en dimensies voor de lijngrafieken
+> #
+> xlabs <- c('1-Rechtdoor zee',
++            '2-Respect tonen',
++            '3-Transparatie creeren',
++            '4-Fouten rechtzetten',
++            '5-Loyaliteit tonen',
++            '6-Resultaten boeken',
++            '7-Jezelf verbeteren',
++            '8-De realiteit onder ogen zien',
++            '9-Duidelijk over verwachtingen',
++            '10-Verantwoording afleggen',
++            '11-Eerst luisteren',
++            '12-Toezeggingen nakomen',
++            '13-Vertrouwen uitdragen')
+> meany <- c(100,100,100,100,100,100,100,100,100,100,100,100,100)
+> y <- c(0,0,0,0,0,0,0,0,0,0,0,0,0)
+> # ------------------------------------------------------------------------------------------------
+> # aanmaken resultsets a) completed surveyresults b) already processed historie
+> # ------------------------------------------------------------------------------------------------
+> tokenresults = dbGetQuery(surveydb,statement=paste('select * from ',tokentable,' where completed!="N"',sep=""))
+> historieresults = dbGetQuery(historiedb,statement=paste('select * from ',tokentable,' where completed!="N"',sep=""))
+> #
+> # ------------------------------------------------------------------------------------------------
+> # Als er geen nieuwe surveyresults zijn die nog niet verwerkt zijn dan kunnen we stoppen 
+> # ------------------------------------------------------------------------------------------------
+> #
+> finalnum <- (nrow(tokenresults)-nrow(historieresults))
+> if (finalnum < 1) 
++ {
++   dbDisconnect(surveydb)
++   dbDisconnect(historiedb)
++   dbUnloadDriver(driver)
++   stop("geen nieuwe surveys gevonden")
++ }
+Error: geen nieuwe surveys gevonden
+Execution halted

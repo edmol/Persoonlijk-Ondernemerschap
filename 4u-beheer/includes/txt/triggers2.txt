@@ -1,0 +1,46 @@
+This clip came out of generator.inc.php
+
+Examples of triggers are no longer written to the generated scripts.
+
+generator.inc.php formerly contained the following:
+
+---------------------------------------------------------------------
+
+if(isset($cfg_trigger_example) && $cfg_trigger_example == 1){
+
+echo_buffer("
+<?php
+
+// http://platon.sk/projects/doc.php/phpMyEdit/html/configuration.triggers.html
+// Filenames are suggested below for your trigger files.
+
+// Select triggers - View form is related to 'select' operation.
+
+// \$opts['triggers']['select']['cancel'] = './triggers/".$cfg_target_prefix.$tb.".TSC.php'; // After canceling the view page
+// \$opts['triggers']['select']['pre']    = './triggers/".$cfg_target_prefix.$tb.".TSP.php'; // Before displaying the view page
+
+// Insert triggers - Add and Copy forms are related to 'insert' operation
+
+// \$opts['triggers']['insert']['after']  = './triggers/".$cfg_target_prefix.$tb.".TIA.php'; // After requesting save or more in the add/copy page
+// \$opts['triggers']['insert']['before'] = './triggers/".$cfg_target_prefix.$tb.".TIB.php'; // Before requesting save or more in the add/copy page
+// \$opts['triggers']['insert']['cancel'] = './triggers/".$cfg_target_prefix.$tb.".TIC.php'; // After canceling the add/copy page
+// \$opts['triggers']['insert']['pre']    = './triggers/".$cfg_target_prefix.$tb.".TIP.php'; // Before displaying the add/copy page
+
+// Update triggers - Edit form is related to 'update' operation.
+
+// \$opts['triggers']['update']['after']  = './triggers/".$cfg_target_prefix.$tb.".TUA.php'; // After requesting save or apply in the edit page
+// \$opts['triggers']['update']['before'] = './triggers/".$cfg_target_prefix.$tb.".TUB.php'; // Before requesting save or apply in the edit page
+// \$opts['triggers']['update']['cancel'] = './triggers/".$cfg_target_prefix.$tb.".TUC.php'; // After canceling the edit page
+// \$opts['triggers']['update']['pre']    = './triggers/".$cfg_target_prefix.$tb.".TUP.php'; // Before displaying the edit page
+
+// Delete triggers - Delete form is related to 'delete' operation.
+
+// \$opts['triggers']['delete']['after']  = './triggers/".$cfg_target_prefix.$tb.".TDA.php'; // After requesting delete in the delete page
+// \$opts['triggers']['delete']['before'] = './triggers/".$cfg_target_prefix.$tb.".TDB.php'; // Before requesting delete in the delete page
+// \$opts['triggers']['delete']['cancel'] = './triggers/".$cfg_target_prefix.$tb.".TDC.php'; // After canceling the delete page
+// \$opts['triggers']['delete']['pre']    = './triggers/".$cfg_target_prefix.$tb.".TDP.php'; // Before displaying the delete page
+
+?>
+
+");
+}; // End if() loop

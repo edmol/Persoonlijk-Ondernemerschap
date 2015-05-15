@@ -1,0 +1,26 @@
+If using multiple databases, "db." or "db_" may be a good 
+choice for the prefix applied to the name of your forms.
+At the top of your form you might add a new variable:
+
+$opts['data_source'] = 1;
+
+In the dbconn.php file, a switch() statement 
+could be added to resolve the connection:
+
+switch($opts['data_source'])
+{
+	Case 2:
+		$opts['hn'] = '127.0.0.1';     // MySQL hostname or IP address
+		$opts['db'] = 'db_name_2';     // MySQL database
+		$opts['un'] = 'db_name_2_usr'; // MySQL user
+		$opts['pw'] = 'db_name_2_pwd'; // MySQL password		
+		break;
+	Case 1:
+	default:
+		$opts['hn'] = 'localhost';     // MySQL hostname or IP address
+		$opts['db'] = 'db_name_1';     // MySQL database
+		$opts['un'] = 'db_name_1_usr'; // MySQL user
+		$opts['pw'] = 'db_name_1_pwd'; // MySQL password		
+		break;
+};
+

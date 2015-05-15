@@ -1,0 +1,1590 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="content-language" content="en-US">
+<meta http-equiv="content-style-type" content="text/css">
+<meta http-equiv="content-type" content="text/html; charset=us-ascii">
+<meta http-equiv="expires" content="Mon, 01 Jan 1900 01:01:01 GMT">
+<meta http-equiv="Pragma" content="no-cache">
+<meta name="googlebot" content="noindex, nofollow, noarchive">
+<meta name="title" content="PHP Form Generator">
+<meta name="abstract" content="PHP Form Generator">
+<meta name="description" content="PHP Form Generator">
+<meta name="keywords" content="PHP Form Generator">
+<meta name="robots" content="noindex, nofollow, noarchive, nocache, noimageindex, nomediaindex">
+<?php require_once('./style/blue.php'); ?>
+
+<script language="javascript" type="text/javascript">
+<!--
+function popWindow(url, width, height) {
+        var Win = window.open(url,"popWindow",'width=' + width + ',height=' + height + ',resizable=1,scrollbars=yes,menubar=no,status=no' );
+}
+//-->
+</SCRIPT>
+
+<title>edit_outlook_contacts.php</title>
+
+</head>
+
+<body>
+
+<?php
+
+switch($HTTP_SERVER_VARS['DOCUMENT_ROOT'])
+{
+   Case 'C:/apache/htdocs':
+      error_reporting(E_ALL & ~E_NOTICE);
+      break;
+   default:
+      error_reporting(0);
+      break;
+};
+
+// Deterime the page mode (operation) <= version 5.4
+
+$operation = array_key_exists('operation', @$_REQUEST) ? strip_tags(stripslashes(trim(@$_REQUEST['operation']))) : '';
+
+$special_label = 'List';
+
+// Get fl2 (set in footer links)
+
+$fl2 = array_key_exists('fl2', @$_REQUEST) ? strip_tags(stripslashes(trim(@$_REQUEST['fl2']))) : '';
+
+if($fl2 > '') { 
+
+   $opts['cgi']['persist'] = array('fl2' => $fl2); 
+
+   $opts['filters'] = 'Company REGEXP "^'.$fl2.'"';
+
+	$special_label = 'Filter by Company  ('.$fl2.')';
+
+}
+
+// Get fl3 (set in footer links)
+
+$fl3 = array_key_exists('fl3', @$_REQUEST) ? strip_tags(stripslashes(trim(@$_REQUEST['fl3']))) : '';
+
+if($fl3 > '') { 
+
+   $opts['cgi']['persist'] = array('fl3' => $fl3); 
+
+   $opts['filters'] = 'LastName REGEXP "^'.$fl3.'"';
+
+	$special_label = 'Filter by Last Name ('.$fl3.')';
+
+}
+
+$oper_label = empty($operation) ? $special_label : $operation;
+
+?>
+
+<table class="container"0 cellspacing="0" cellpadding="5"> <!-- cfg_cont_table_usage = 1 -->
+
+<tr><td>
+	<h3><?php echo $oper_label; ?></h3> <!-- cfg_cont_table_row1 -->
+</td></tr>
+
+<tr><td> <!-- Container table cell for phpMyEdit form -->
+
+<?php
+
+// $opts['logtable'] = '';
+
+$opts['tb'] = 'contacts';
+
+require('./output/inc/dbvars.php');
+
+$opts['key'] = 'ID';
+
+$opts['key_type'] = 'int';
+
+$opts['sort_field'] = array('Company');
+
+$opts['inc'] = 10;
+
+$opts['options'] = 'ACPVDF';
+
+$opts['multiple'] = '4';
+
+$opts['navigation'] = 'TUD';
+
+$opts['display'] = array('form' => true, 'query' => true, 'sort' => true, 'time' => false, 'tabs' => true);
+
+$opts['language'] = $HTTP_SERVER_VARS['HTTP_ACCEPT_LANGUAGE'];
+
+
+$opts['fdd']['ID'] = array(
+  'css'        => array('postfix' => 'right-justify'),
+  'default'    => '0',
+  'input'      => 'R',
+  'maxlen'     => 8,
+  'name'       => 'ID',
+  'options'    => 'VD',
+  'required'   => true,
+  'select'     => 'T',
+  'size|ACP'   => 8,
+  'tab'        => 'Company',
+  'sort'       => true
+);
+// Column type: int - mediumint(8)
+
+
+$opts['fdd']['Company'] = array(
+  'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Company',
+  'options'    => 'ACPVDLF',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Company',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Department'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Department',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Department',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['JobTitle'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'JobTitle',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'JobTitle',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['BusinessStreet'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'BusinessStreet',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'BusinessStreet',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['BusinessStreet2'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'BusinessStreet2',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'BusinessStreet2',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['BusinessStreet3'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'BusinessStreet3',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'BusinessStreet3',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['BusinessCity'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'BusinessCity',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'BusinessCity',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['BusinessState'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'BusinessState',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'BusinessState',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['BusinessPostalCode'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'BusinessPostalCode',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'BusinessPostalCode',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['BusinessCountry'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'BusinessCountry',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'BusinessCountry',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Title'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Title',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+  'tab'        => 'Person',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['FirstName'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'FirstName',
+  'options'    => 'ACPVDLF',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'FirstName',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['MiddleName'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'MiddleName',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'MiddleName',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['LastName'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'LastName',
+  'options'    => 'ACPVDFL',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'LastName',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Suffix'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Suffix',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Suffix',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+
+
+$opts['fdd']['HomeStreet'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'HomeStreet',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'HomeStreet',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['HomeStreet2'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'HomeStreet2',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'HomeStreet2',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['HomeStreet3'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'HomeStreet3',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'HomeStreet3',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['HomeCity'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'HomeCity',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'HomeCity',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['HomeState'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'HomeState',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'HomeState',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['HomePostalCode'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'HomePostalCode',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'HomePostalCode',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['HomeCountry'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'HomeCountry',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'HomeCountry',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['OtherStreet'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'OtherStreet',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'OtherStreet',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['OtherStreet2'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'OtherStreet2',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'OtherStreet2',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['OtherStreet3'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'OtherStreet3',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'OtherStreet3',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['OtherCity'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'OtherCity',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'OtherCity',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['OtherState'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'OtherState',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'OtherState',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['OtherPostalCode'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'OtherPostalCode',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'OtherPostalCode',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['OtherCountry'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'OtherCountry',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'OtherCountry',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['AssistantsPhone'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'AssistantsPhone',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+  'tab'        => 'Phone',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['BusinessFax'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'BusinessFax',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'BusinessFax',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['BusinessPhone'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'BusinessPhone',
+  'options'    => 'ACPVDLF',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'BusinessPhone',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['BusinessPhone2'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'BusinessPhone2',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'BusinessPhone2',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Callback'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Callback',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Callback',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['CarPhone'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'CarPhone',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'CarPhone',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['CompanyMainPhone'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'CompanyMainPhone',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'CompanyMainPhone',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['HomeFax'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'HomeFax',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'HomeFax',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['HomePhone'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'HomePhone',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'HomePhone',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['HomePhone2'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'HomePhone2',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'HomePhone2',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['ISDN'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'ISDN',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'ISDN',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['MobilePhone'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'MobilePhone',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'MobilePhone',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['OtherFax'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'OtherFax',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'OtherFax',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['OtherPhone'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'OtherPhone',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'OtherPhone',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Pager'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Pager',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Pager',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['PrimaryPhone'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'PrimaryPhone',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'PrimaryPhone',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['RadioPhone'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'RadioPhone',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'RadioPhone',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['TTYTDDPhone'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'TTYTDDPhone',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'TTYTDDPhone',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Telex'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Telex',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Telex',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Account'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Account',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Account',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Anniversary'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Anniversary',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Anniversary',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['AssistantsName'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'AssistantsName',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'AssistantsName',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['BillingInformation'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'BillingInformation',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'BillingInformation',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Birthday'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Birthday',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Birthday',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Categories'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Categories',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Categories',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Children'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Children',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Children',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['DirectoryServer'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'DirectoryServer',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'DirectoryServer',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['EmailAddress'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'EmailAddress',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'EmailAddress',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['EmailDisplayName'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'EmailDisplayName',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'EmailDisplayName',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Email2Address'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Email2Address',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Email2Address',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Email2DisplayName'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Email2DisplayName',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Email2DisplayName',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Email3Address'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Email3Address',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Email3Address',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Email3DisplayName'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Email3DisplayName',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Email3DisplayName',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Gender'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Gender',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Gender',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['GovernmentIDNumber'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'GovernmentIDNumber',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'GovernmentIDNumber',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Hobby'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Hobby',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Hobby',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Initials'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Initials',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Initials',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['InternetFreeBusy'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'InternetFreeBusy',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'InternetFreeBusy',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Keywords'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Keywords',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Keywords',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Language1'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Language1',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Language1',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Location'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Location',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Location',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['ManagersName'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'ManagersName',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'ManagersName',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Mileage'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Mileage',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Mileage',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Notes'] = array(
+  'help|ACP'   => 'Limit 16,777,215 chars.',
+  'input'      => '',
+  'maxlen'     => 16777215,
+  'name'       => 'Notes',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'sqlw'       => 'TRIM("$val_as")',
+  'strip_tags|LF' => true,
+  'tab'        => 'Notes',
+  'textarea'   => array('rows' => '5', 'cols' => '58'),
+  'trimlen|LF' => 30,
+  'sort'       => false
+);
+// Column type: blob - longtext
+
+
+$opts['fdd']['OfficeLocation'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'OfficeLocation',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+  'tab'        => 'Other',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['OrganizationalIDNumber'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'OrganizationalIDNumber',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'OrganizationalIDNumber',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['POBox'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'POBox',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'POBox',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Priority'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Priority',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Priority',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Private'] = array(
+  'css'        => array('postfix' => 'right-justify'),
+  'default'    => '0',
+//  'help|ACP'   => 'Limit 1 digits',
+  'input'      => '',
+  'maxlen'     => 1,
+  'name'       => 'Private',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 1,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Private',
+  'sort'       => true
+);
+// Column type: int - tinyint(1) unsigned
+$opts['fdd']['Private']['values2'] = array('0' => 'No',  '1' => 'Yes');
+
+
+$opts['fdd']['Profession'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Profession',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Profession',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['ReferredBy'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'ReferredBy',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'ReferredBy',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Sensitivity'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Sensitivity',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Sensitivity',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['Spouse'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'Spouse',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'Spouse',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['User1'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'User1',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'User1',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['User2'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'User2',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'User2',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['User3'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'User3',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'User3',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['User4'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'User4',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'User4',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+
+$opts['fdd']['WebPage'] = array(
+//   'help|ACP'   => 'Limit 255 chars.',
+  'input'      => '',
+  'maxlen'     => 255,
+  'name'       => 'WebPage',
+  'options'    => 'ACPVD',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 60,
+  'sqlw'       => 'TRIM("$val_as")',
+//  'tab'        => 'WebPage',
+  'sort'       => true
+);
+// Column type: string - varchar(255)
+
+# $opts['notify']['from']   = 'user@domain.com';
+# $opts['notify']['prefix'] = $_SERVER['REQUEST_URI'].' - ';
+# $opts['notify']['wrap']   = '72';
+// $opts['notify']['insert'] = 'user@domain.com';
+// $opts['notify']['update'] = 'user@domain.com';
+// $opts['notify']['delete'] = 'user@domain.com';
+# $opts['notify']['all']    = 'user@domain.com'; // (insert, update, and, delete)
+
+
+require('phpMyEdit.tabclass.php');
+
+new phpMyEdit($opts);
+
+?>
+
+
+</td></tr> <!-- phpMyEdit form above -->
+
+</table> <!-- End container table -->
+
+
+<?php
+
+if($operation == '' && $moreadd != 'More' && $morechange != 'Apply'){ 
+
+	echo "\n".'<table class="container"><tr><td>Company Filter</td><td>';
+
+	for($i=65; $i<91; ++$i) {
+
+	   echo "\n".'<a href="'.basename($_SERVER["PHP_SELF"]).'?fl2='.chr($i).'">'.chr($i).'</a>';
+
+	   echo ($i < 90) ? ' - '."\n" : "\n";
+
+	}
+
+	echo "\n".'</td></tr>';
+
+	echo "\n".'<tr><td>Last Name Filter</td><td>';
+
+	for($i=65; $i<91; ++$i) {
+
+	   echo "\n".'<a href="'.basename($_SERVER["PHP_SELF"]).'?fl3='.chr($i).'">'.chr($i).'</a>';
+
+	   echo ($i < 90) ? ' - '."\n" : "\n";
+
+	}
+
+	echo "\n".'</td></tr><tr><td colspan="2"><a href="'.basename($_SERVER["PHP_SELF"]).'?fl2=&fl3=">List All</a></td></tr></table>';
+
+}
+
+?>
+
+
+</body>
+
+</html>
+
+
+
+

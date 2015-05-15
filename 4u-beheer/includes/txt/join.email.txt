@@ -1,0 +1,173 @@
+Hi Doug.
+
+Thanks for your quick reply.    Your examples helped hugely.
+
+I stumbled across (what I think is) an undocumented feature which also
+helped resolve my problem.  You can reference a given field in the main
+table multiple times by adding "|<some unique number>" to the field name.
+
+Ex:
+$opts['fdd']['supplier_id'] = array(...);  // show supplier id
+$opts['fdd']['supplier_id|1'] = array(...); // virtual field one for
+supplier name
+$opts['fdd']['supplier_id|2'] = array(...); // virtual field two for
+supplier address
+$opts['fdd']['supplier_id|3'] = array(...); // virtual field three for
+supplier phone
+
+The attached file has the details.
+
+-- Tom
+- Show quoted text -
+
+Doug Hockinson wrote:
+> I don't mind the inquiry. Unfortunately (I hate to admit it) I always
+> struggle with JOIN stuff. Have wasted countless hours trying to get
+> this to work. My memory may be mistaken, but I think at one time there
+> was an error in documentation for complex joins.
+>
+> The problem arises whenever two tables contain the same field name.
+> The field names are the problem. If at all possible, rename
+> supplier_id to supplier_id2 or something. After renaming one of the
+> fields, you'll probably find the problem goes away because the join
+> syntax doesn't have to be quite as complex.
+>
+> I am currently swamped with work and don't have time to carefully
+> consider this. I attached my notes on JOIN (which may contain some
+> dysfunctional examples).
+>
+> Probably you've already searched the forum for "JOIN" and/or the
+> related keywords.
+>
+> Renaming fields is not always possible. Perhaps another workaround
+> would be to create a new field with a different name in one of the
+> tables and propagate the values to the new field with some sort of SQL
+> query via phpMyAdmin.
+>
+
+
+
+
+// CREATE TABLE `invoice` (
+//   `invoice_id` INT NOT NULL auto_increment,
+//   `invoice_date` DATE NOT NULL ,
+//   `supplier_id` INT NOT NULL ,
+//   `invoice_amount` FLOAT NOT NULL ,
+//   `payment_terms` ENUM( '10 days', '30 days', '45 days', '60 days' ) NULL,
+//   PRIMARY KEY  (`invoice_id`)
+// ) ENGINE = MYISAM COMMENT = 'Invoices received that need to be paid';
+
+
+// CREATE TABLE `supplier` (
+//   `supplier_id` int(11) NOT NULL auto_increment,
+//   `supplier_name` varchar(30) NOT NULL,
+//   `supplier_address` varchar(50) NOT NULL,
+//   `supplier_phone` varchar(20) NOT NULL,
+//   PRIMARY KEY  (`supplier_id`)
+// ) ENGINE=MyISAM COMMENT='People/companies who provide stuff to us';
+
+
+//====================================================
+// Multiple Virtual Fields/Columns example
+// ------------------------------------------------
+// This example shows how a non-key field in the
+// main table can be used to reference a foreign key
+// in a secondary table and display multiple columns
+// from the secondary table as virtual fields/columns
+//
+// The magic is in the '|<number>' appended to the
+// field name of the link field within the main table
+//
+// I have no idea if this is supposed to work this way
+// ... but it does
+//====================================================
+
+$main_table = 'invoice';
+$join_table = 'supplier';
+
+//====================================================
+// Non-key Column in main table - Supplier ID
+// ------------------------------------------------
+// This is the field we will use as the link from the
+// main table to the key field in the join table
+//
+// Included here to show that the link field itself
+// can be displayed;
+//====================================================
+
+$opts['fdd']['supplier_id'] = array(
+ 'name'     => 'Supplier ID',
+ 'select'   => 'D',                        // Supplier ID will be a dropdown list; hmm... what happens with large # of suppliers
+ 'options'  => 'VACPDL',
+ 'maxlen'   => 11,
+ 'sort'     => true,
+ 'values' => Array(                        // API for currently making a join in PME.
+        'table'       => $join_table,      // the table to which we're joining
+        'column'      => 'supplier_id',    // the key field in the joined table
+        'join' => '$main_table.supplier_id = $join_table.supplier_id',
+        'description' => 'supplier_id',    // the desired column in the joined table
+  )
+);
+
+//====================================================
+// Virtual Column 1 - Invoice -> Supplier Name
+// ------------------------------------------------
+// Uses invoices.supplier_id to link to suppliers.supplier_id
+// then grabs the corresponding supplier_name
+//====================================================
+
+$opts['fdd']['supplier_id|1'] = array(
+   'name' => 'Supplier Name',
+   'input'      => 'VR',                     // because field is V(irtual), it don't exist in the main table
+   'options'    => 'PVDFL',
+   'sort' => true,
+   'values' => Array(                        // API for currently making a join in PME.
+        'table'       => $join_table,        // the table to which we're joining
+        'column'      => 'supplier_id',      // the key field in the joined table
+        'description' => 'supplier_name',    // the desired column in the joined table
+        // custom join because PME can't guess the joining field because it's virtual.
+        'join' => '$main_table.supplier_id = $join_table.supplier_id',
+   )
+);
+
+//====================================================
+// Virtual Column 2 - Invoice -> Supplier Address
+// ------------------------------------------------
+// Uses invoices.supplier_id to link to suppliers.supplier_id
+// then grabs the corresponding supplier_address
+//====================================================
+
+$opts['fdd']['supplier_id|2'] = array(
+   'name' => 'Address',
+   'input'      => 'VR',                     // because field is V(irtual), it don't exist in the main table
+   'options'    => 'PVDFL',
+   'sort' => true,
+   'values' => Array(                        // API for currently making a join in PME.
+        'table'       => $join_table,        // the table to which we're joining
+        'column'      => 'supplier_id',      // the key field in the joined table
+        'description' => 'supplier_address', // the desired column in the joined table
+        // custom join because PME can't guess the joining field because it's virtual.
+        'join' => '$main_table.supplier_id = $join_table.supplier_id',
+   )
+);
+
+//====================================================
+// Virtual Column 3 - Invoice -> Supplier Phone
+// ------------------------------------------------
+// Uses invoices.supplier_id to link to suppliers.supplier_id
+// then grabs the corresponding supplier_phone
+//====================================================
+
+$opts['fdd']['supplier_id|3'] = array(
+   'name' => 'Phone',
+   'input'      => 'VR',                     // because field is V(irtual), it don't exist in the main table
+   'options'    => 'PVDFL',
+   'sort' => true,
+   'values' => Array(                        // API for currently making a join in PME.
+        'table'       => $join_table,        // the table to which we're joining
+        'column'      => 'supplier_id',      // the key field in the joined table
+        'description' => 'supplier_phone',   // the desired column in the joined table
+        // custom join because PME can't guess the joining field because it's virtual.
+        'join' => '$main_table.supplier_id = $join_table.supplier_id',
+   )
+);

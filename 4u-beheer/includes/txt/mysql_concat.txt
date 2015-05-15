@@ -1,0 +1,215 @@
+$opts['fdd']['email'] = array(
+  'name'       => 'Email',
+  'maxlen'     => 45,
+  'required'   => false,
+  'options'    => 'ACPVDFL',
+  'select'     => 'T',
+  'nowrap'     => 'false',
+  'help|ACP'   => 'Limit 45 chars.',
+  'sort'       => true
+);
+
+$opts['fdd']['email']['escape'] = false;
+
+$opts['fdd']['email']['sql|LF'] = 
+	'if(email <> "", CONCAT("<a href=\"mailto:", email, "?subject=Hello&body=Merry%20Christmas, Bill\">", email, "</a>"), "")';
+
+-----
+
+Forum example for changing colors, uses MySQL CONCAT and CASE
+
+$opts['fdd']['status']['sql|LF'] =
+  'CONCAT("<span style=\"color:",
+     CASE status
+        WHEN "sold" THEN "red"
+        WHEN "pending" THEN "yellow"
+        ELSE "green"
+     END,
+    "\">", status, "</span>")'; 
+
+-----
+
+$opts['fdd']['hidden']['sql|LF'] =
+  'CONCAT("<span style=\"color:",
+     CASE hidden 
+        WHEN "0" THEN "green"
+        WHEN "1" THEN "black"
+        ELSE "red"
+     END,
+    "\">", hidden, "</span>")'; 
+
+-----
+
+$opts['fdd']['PriceCode']['escape'] = false;
+
+$opts['fdd']['PriceCode']['sql|LF'] = 
+	'if(
+		PriceCode = "C", 
+			PriceCode, 
+				if(
+					PriceCode = "B", 
+						CONCAT("<span style=\"color:#cc9966\">", PriceCode, "</span>"), 
+							CONCAT("<span style=\"color:#ffcc99\">", PriceCode, "</span>")
+				   )
+	)';
+
+-----
+
+$opts['fdd']['start_date']['sql|LV'] = 'if(start_date > "", CONCAT(start_date, "%b %e %Y - %a"), "")';
+
+-----
+
+$opts['fdd']['name']['sql|LF'] = 'if(name <> "", CONCAT("get_code(\'<span style=\"color:#FF0000\">", name, "</span>\');"), name)';
+
+-----
+
+$opts['fdd']['name']['sql|LF'] = 'if(name <> "", CONCAT("get_code(", name, ");"), name)';
+
+-----
+
+$opts['fdd']['LastName']['sql|LF'] = 'if(FirstName <> "", CONCAT(LastName, ", ", FirstName), LastName)';
+
+-----
+
+Given a column named 'time_int' that is an integer column containing values set by PHP's time() function, the following has an effect similar to that of a TIMESTAMP.
+
+$opts['cgi']['overwrite']['time_int'] = time();
+
+$opts['fdd']['time_int']['sql'] = 'CONCAT(FROM_UNIXTIME(time_int))';
+
+-----
+
+CONCAT_WS used to display multiple columns in one cell, separated by <br> tags:
+
+$opts['fdd']['start_date'] = array(
+  'name'       => 'Start Date',
+  'default'    => date('Y-m-d'),
+  'maxlen'     => 10,
+  'required'   => true,
+  'options'    => 'ACPVDLF',
+  'select'     => 'D',
+  'nowrap'     => 'true',
+  'sort'       => true
+);
+
+// For the benefit of "<br>" below:
+$opts['fdd']['start_date']['escape'] = false;
+
+$opts['fdd']['start_date']['sql|LV'] =
+  'if(start_time <> "00:00:00",
+    CONCAT_WS("<br>",
+      DATE_FORMAT(start_date, "%a %b %e %Y"),
+        TIME_FORMAT(start_time, "%l:%i %p")),
+          DATE_FORMAT(start_date, "%a %b %e %Y")
+  )';
+
+$opts['fdd']['start_time'] = array(
+  'name'       => 'Start Time',
+  'default'    => '00:00:00',
+  'maxlen'     => 8,
+  'required'   => true,
+  'options'    => 'ACPVDLF',
+  'sort'       => true
+);
+
+-----
+
+Given columns named 'start_date' and 'start_time' and the desire to display the 'start_time' field below the 'start_date' field in List mode when 'start_time' is not equal to the default "00:00:00" then try:
+
+$opts['fdd']['start_date']['escape'] = false;
+$opts['fdd']['start_date']['sql|LV'] = 'if(start_time <> "00:00:00", CONCAT_WS("<br>", DATE_FORMAT(start_date, "%a %b %e %Y"), TIME_FORMAT(start_time, "%l:%i %p")), DATE_FORMAT(start_date, "%a %b %e %Y"))';
+
+-----
+
+Change the font color of 'start_date' using a SPAN tag 
+
+$opts['fdd']['start_date'] = array(
+  'default'    => date('Y-m-d'),
+  'escape'     => false,
+  'maxlen'     => 10,
+  'name'       => 'Start Date',
+  'nowrap'     => 'true',
+  'options'    => 'ACPVDLF',
+  'required'   => false,
+  'select'     => 'D',
+  'tab'        => 'Start Date',
+  'sort'       => true
+);
+
+$opts['fdd']['start_date']['sql|LF'] = 'if( start_date < "'.date("Ymd").'", CONCAT("<span style=\"color:#999999\">", start_date, "</span>"), start_date )';
+// 'datemask'   => 'Y-m-d',
+-----
+
+MySQL DATE_FORMAT(start_time, '%r') AS new_time
+
+Formats the date value according to the format string. The following specifiers may be used in the format string:
+
+Specifier    Description
+
+%a - Abbreviated weekday name (Sun..Sat)
+%b - Abbreviated month name (Jan..Dec)
+%c - Month, numeric (0..12)
+%D - Day of the month with English suffix (0th, 1st, 2nd, 3rd, etc.)
+%d - Day of the month, numeric (00..31)
+%e - Day of the month, numeric (0..31)
+%f - Microseconds (000000..999999)
+%H - Hour (00..23)
+%h - Hour (01..12)
+%I - Hour (01..12)
+%i - Minutes, numeric (00..59)
+%j - Day of year (001..366)
+%k - Hour (0..23)
+%l - Hour (1..12)
+%M - Month name (January..December)
+%m - Month, numeric (01..12)
+%p - AM or PM
+%r - Time, 12-hour (hh:mm:ss followed by AM or PM)
+%S - Seconds (00..59)
+%s - Seconds (00..59)
+%T - Time, 24-hour (hh:mm:ss)
+%U - Week (00..53), where Sunday is the first day of the week
+%u - Week (00..53), where Monday is the first day of the week
+%V - Week (01..53), where Sunday is the first day of the week; used with %X
+%v - Week (01..53), where Monday is the first day of the week; used with %x
+%W - Weekday name (Sunday..Saturday)
+%w - Day of the week (0=Sunday..6=Saturday)
+%X - Year for the week where Sunday is the first day of the week, numeric, 4 digits; used with %V
+%x - Year for the week, where Monday is the first day of the week, numeric, 4 digits; used with %v
+%Y - Year, numeric, 4 digits
+%y - Year, numeric, 2 digits
+%% - A literal `%'.
+
+-----
+
+Convert an integer field whose value resulted from inserting time():
+$opts['fdd']['col_name']['sql'] = 'CONCAT(FROM_UNIXTIME(col_name, \"%a %b %e %Y %h:%i %p\"))';
+
+-----
+
+if($operation != 'List'){
+
+	$opts['fdd']['hidden']['values2'] = array('0' => 'No', '1' => 'Yes');
+
+}else{
+
+	$opts['fdd']['hidden']['values2'] = array('0' => 'No', '1' => "<img src=\"images/alert.gif\">");
+
+}
+
+-----
+
+
+$opts['fdd']['host_name'] = array(
+  'escape'     => false,
+  'input'      => '',
+  'maxlen'     => 50,
+  'name'       => 'Host Name',
+  'options'    => 'ACPVDFL',
+  'required'   => false,
+  'select'     => 'T',
+  'size|ACP'   => 50,
+  'sqlw'       => 'TRIM("$val_as")',
+  'sort'       => true,
+   'sql|lf' => 'if(host_name = "aqhost.com", CONCAT("<a href=\"http://", domain_name, ":2082/3rdparty/phpMyAdmin/index.php\" target=\"_blank\">pma</a> - <a href=\"http://", domain_name, ":2082/frontend/AQHost/backup/index.html\" target=\"_blank\">backup</a> - <a href=\"http://", domain_name, ":2082/frontend/AQHost/stats/index.html\" target=\"_blank\">stats</a> - <a href=\"http://", domain_name, ":2082/frontend/AQHost/cron/index.html\" target=\"_blank\">cron</a>"), "")',
+);
+// MySQL column 5: string - varchar(50)

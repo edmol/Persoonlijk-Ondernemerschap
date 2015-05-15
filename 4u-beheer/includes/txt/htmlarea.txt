@@ -1,0 +1,60 @@
+July 2005: Development of htmlarea has been discontinued.
+
+Notes for implementing htmlarea (may be incomplete).
+
+htmlarea only works with MS Internet Explorer.
+
+Download phpMyEdit-htmlarea.class.php from www.platon.sk CVS
+
+Consider placing the following two Javascripts in an included file.
+Set the fieldname in the second script.
+
+<script language="Javascript1.2"><!-- // load htmlarea
+_editor_url = "htmlarea/";   // URL to htmlarea files
+var win_ie_ver = parseFloat(navigator.appVersion.split("MSIE")[1]);
+if (navigator.userAgent.indexOf('Mac')        >= 0) { win_ie_ver = 0; }
+if (navigator.userAgent.indexOf('Windows CE') >= 0) { win_ie_ver = 0; }
+if (navigator.userAgent.indexOf('Opera')      >= 0) { win_ie_ver = 0; }
+if (win_ie_ver >= 5.5) {
+ document.write('<scr' + 'ipt src="' +_editor_url+ 'editor.js"');
+ document.write(' language="Javascript1.2"></scr' + 'ipt>');
+} else { document.write('<scr'+'ipt>function editor_generate() { return false; }</scr'+'ipt>'); }
+// --></script>
+
+<script language="JavaScript1.2" defer>
+editor_generate('content');
+</script>
+
+
+For the appropriate BLOB field in a phpMyEdit form, in the field array, 
+add 'html' => true to the field array.
+
+Old: 'textarea'   => array('rows' => '25', 'cols' => '110'),
+New: 'textarea'   => array('rows' => '25', 'cols' => '110', 'html' => true),
+
+The end result should look something like this:
+
+$opts['fdd']['fieldname'] = array(
+  'name'       => 'Content',
+  'required'   => false,
+  'options'    => 'ACPVDF',
+  'select'     => 'T',
+  'textarea'   => array('rows' => '25', 'cols' => '110', 'html' => true),
+  'trimlen|LF' => 30,
+  'sort'       => false
+);
+
+I'm not sure about the possible impact of 'strip_tags' 
+thus perhaps it should be omitted or commented out if
+it exists and problems occur.
+
+  'strip_tags' => true,
+
+Comment out:
+
+// require('phpMyEdit.tabclass.php');
+// new phpMyEdit($opts);
+
+require('extensions/phpMyEdit-htmlarea.class.php');
+new phpMyEdit_htmlearea($opts);
+

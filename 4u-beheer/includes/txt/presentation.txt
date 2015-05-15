@@ -1,0 +1,161 @@
+If troubleshooting, or trying to resolve available variables use your text 
+editor to search for 'function execute' ... then uncomment a section of 
+code in order to enable the display of currently available variables.
+
+	function execute() /* {{{ */
+	{
+		//  DEBUG -  uncomment to enable
+		/*
+		//phpinfo();
+		$this->print_get_vars();
+		$this->print_post_vars();
+		$this->print_vars();
+		echo "<pre>query opts:\n";
+		echo print_r($this->query_opts);
+		echo "</pre>\n";
+		echo "<pre>get vars:\n";
+		echo print_r($this->get_opts);
+		echo "</pre>\n";
+		 */
+      [snip]
+
+
+The following does NOT work
+
+	$opts['language'] = $HTTP_SERVER_VARS['HTTP_ACCEPT_LANGUAGE'];
+
+	$operation = $HTTP_GET_VARS['operation'];
+
+	if(!isset($operation)) { $operation = $HTTP_POST_VARS['operation']; }
+
+	if($operation == '' && $moreadd != 'More' && $morechange != 'Apply'){
+
+	    // The current page operation is List mode
+
+	} 
+
+... but this DOES appear to work ...
+
+	$opts['language'] = 'EN-US';
+
+	$operation = $HTTP_GET_VARS['operation'];
+
+	if(!isset($operation)) { $operation = $HTTP_POST_VARS['operation']; }
+
+	if($operation == '' && $moreadd != 'More' && $morechange != 'Apply'){
+
+	    // The current page operation is List mode
+
+	} 
+
+
+
+The above container table has 4 cells. Spacers are used in the first 
+and last table cells in order to utilize an image for the background.
+
+// First cell defined as
+$spacer1 = '<td><img src="images/spacer.gif" width="30" height="1" border="0" alt=""></td>';
+
+// Last cell defined as
+$spacer2 = '<td><img src="images/spacer.gif" width="5" height="1" border="0" alt=""></td>';
+
+The following are then placed in the appropriate spot(s) in the container table.
+
+'.$spacer1.'
+
+'.$spacer2.'
+
+<?php echo $spacer1; ?>
+
+<?php echo $spacer2; ?>
+
+++++++++++++++++++++++++++
+
+// The array:
+
+   $my_array = array(
+      '15' => 'Automobile', 
+      '32' => 'Client Web Sites etc.', 
+       '9' => 'Colorado Cities & Towns', 
+      '10' => 'Colorado Counties', 
+      '24' => 'Colorado Miscellaneous', 
+      '13' => 'Colorado Newspapers', 
+      '12' => 'Colorado State Gov\'t', 
+      '14' => 'Consumer Info', 
+      '29' => 'Computer Graphics Misc.', 
+       '1' => 'Computer Hardware', 
+      '28' => 'Computer Hardware Pricing', 
+      '25' => 'Computer Magazines', 
+       '2' => 'Computer Software', 
+      '26' => 'Computer Stores Online', 
+      '27' => 'Computer Tech Support', 
+       '7' => 'Denver Employment', 
+      '34' => 'Denver Government', 
+       '5' => 'Denver Libraries', 
+      '33' => 'Denver Miscellaneous', 
+       '8' => 'Denver TV Stations', 
+       '6' => 'Denver Utilities, etc.', 
+      '17' => 'Federal Government', 
+      '19' => 'Health and Medicine', 
+      '22' => 'Internet Apps - HTML', 
+      '30' => 'Internet Apps - Javascript', 
+      '21' => 'Internet Apps - PHP/MySQL', 
+      '35' => 'Internet Apps - Robots', 
+      '36' => 'Internet Apps - SSL Cert', 
+      '23' => 'Internet Apps - Tools', 
+      '20' => 'Miscellaneous', 
+       '0' => 'Search Engines', 
+       '4' => 'Search Engines 2', 
+      '16' => 'Small Business', 
+      '18' => 'Stocks and Investing', 
+       '3' => 'US State Home Pages', 
+      '11' => 'WebCams'
+   );
+
+
+// Array key is passed as 'xfl' and made persistent
+
+   if($sw != 'Search' && $filter != 'Query'){
+      $xfl = $_GET['xfl'];
+      if(!isset($xfl)) {
+         $xfl = $_POST['xfl']; 
+      }
+      $opts['cgi']['persist'] = array('xfl' => $xfl); 
+      $opts['filters'] = "cid = '$xfl'";
+   }
+
+
+// Current operation label is changed to the Category
+
+   foreach($my_array as $key => $val) {
+      if($xfl == $key) {
+         $oper_label = htmlspecialchars($val);
+         break;
+      }
+   }
+
+
+// Category Links are displayed.
+
+   if($operation == '' && $moreadd != 'More') { 
+      echo '<td class="tiny" valign="top" nowrap>Categories:<br>';
+      foreach($my_array as $key => $val) {
+         echo $xfl == $key ? '<span class="tiny" style="color:#999999">'.htmlspecialchars($val).'</span><br>' : "\n\t\t".'<a href="bookmarks.php?xfl='.$key.'" title="'.htmlspecialchars($val).'" onMouseOver="window.status=\''.$val.'\'; return true" onMouseOut="window.status=\'\'; return true">'.htmlspecialchars($val).'</a><br>';
+      }
+      echo '<hr><a href="index.php" title="Home" class="tiny">Home</a><hr><br>';
+      echo '</td>';
+   }
+
+
++++++++++++
+
+$now = time();
+
+$opts['fdd']['dummy_field'] = array(
+  'css'        => array('postfix' => 'right-justify'),
+  'name'       => 'Days since last edit',
+  'mask'       =>  '%0.1f',
+  'options'    => 'L',
+  'sql'        => "($now - UNIX_TIMESTAMP(updated))/86400",
+); 
+
